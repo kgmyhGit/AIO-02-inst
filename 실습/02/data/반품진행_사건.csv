@@ -1,0 +1,9 @@
+event_id,occurred_at,inquiry_id,event_type,actor,detail
+EV-001,2026-09-10T15:00:00+09:00,INQ-004,approval_approved,cs_staff,환불 예정 33000원 승인
+EV-002,2026-09-10T16:20:00+09:00,INQ-013,approval_rejected,cs_staff,첨부 사진에서 택이 제거된 것을 확인
+EV-003,2026-09-10T16:40:00+09:00,INQ-015,approval_approved,cs_staff,환불 예정 39000원 승인
+EV-004,2026-09-11T10:10:00+09:00,INQ-013,staff_closed,cs_staff,택 제거로 반품 불가 안내 발송
+EV-005,2026-09-14T16:00:00+09:00,INQ-004,pickup_completed,courier,회수 완료
+EV-006,2026-09-14T17:30:00+09:00,INQ-015,pickup_completed,courier,회수 완료
+EV-007,2026-09-15T11:00:00+09:00,INQ-004,inspection_passed,warehouse,착용 흔적과 택 이상 없음
+EV-008,2026-09-15T14:00:00+09:00,INQ-015,inspection_failed,warehouse,옷깃 안쪽에 화장품 자국

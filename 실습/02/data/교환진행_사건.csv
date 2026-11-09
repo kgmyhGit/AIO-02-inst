@@ -1,0 +1,9 @@
+event_id,occurred_at,inquiry_id,event_type,actor,detail
+EX-001,2026-09-10T11:30:00+09:00,INQ-101,approval_approved,cs_staff,L 사이즈 교환과 왕복 배송비 6000원 고객 부담 승인
+EX-002,2026-09-10T16:00:00+09:00,INQ-112,approval_rejected,cs_staff,첨부 사진에서 목 부분이 늘어난 착용 흔적 확인
+EX-003,2026-09-10T16:30:00+09:00,INQ-114,approval_approved,cs_staff,그레이 L 교환과 왕복 배송비 6000원 고객 부담 승인
+EX-004,2026-09-11T09:40:00+09:00,INQ-112,staff_closed,cs_staff,착용 흔적으로 교환 불가 안내 발송
+EX-005,2026-09-14T15:00:00+09:00,INQ-101,pickup_completed,courier,회수 완료
+EX-006,2026-09-14T16:10:00+09:00,INQ-114,pickup_completed,courier,회수 완료
+EX-007,2026-09-15T10:30:00+09:00,INQ-101,inspection_passed,warehouse,착용 흔적과 택 이상 없음
+EX-008,2026-09-15T13:20:00+09:00,INQ-114,inspection_failed,warehouse,소매 끝 보풀과 세탁 흔적

@@ -1,0 +1,72 @@
+[
+  {
+    "sample_id": "A1",
+    "received_at": "2026-09-10T08:10:00+09:00",
+    "message_id": "M-101",
+    "caption": "아침",
+    "output": {
+      "is_food": true,
+      "meal_type": "breakfast",
+      "foods": [
+        { "food_name": "토스트", "amount": "2장", "calories": 280, "protein_g": 9, "sodium_mg": 420, "confidence": "high" },
+        { "food_name": "우유", "amount": "1컵(200ml)", "calories": 130, "protein_g": 6, "sodium_mg": 100, "confidence": "high" }
+      ],
+      "summary": "탄수화물 위주의 아침입니다."
+    }
+  },
+  {
+    "sample_id": "A2",
+    "received_at": "2026-09-10T12:40:00+09:00",
+    "message_id": "M-102",
+    "caption": null,
+    "output": {
+      "is_food": true,
+      "meal_type": "lunch",
+      "foods": [
+        { "food_name": "김치찌개", "amount": "1인분", "calories": 250, "protein_g": 18, "sodium_mg": 1450, "confidence": "medium" },
+        { "food_name": "계란말이", "amount": "2조각", "calories": 120, "protein_g": 8, "sodium_mg": null, "confidence": "low" }
+      ],
+      "summary": "국물 요리라 나트륨이 높은 편입니다."
+    }
+  },
+  {
+    "sample_id": "A3",
+    "received_at": "2026-09-10T15:20:00+09:00",
+    "message_id": "M-103",
+    "caption": null,
+    "output": {
+      "is_food": false,
+      "meal_type": null,
+      "foods": [],
+      "summary": "책상 위 노트북 사진으로 음식이 보이지 않습니다."
+    }
+  },
+  {
+    "sample_id": "A4",
+    "received_at": "2026-09-10T19:05:00+09:00",
+    "message_id": "M-104",
+    "caption": "저녁",
+    "output": {
+      "is_food": true,
+      "meal_type": "dinner",
+      "foods": [
+        { "food_name": "닭가슴살 샐러드", "amount": "1접시", "calories": "약 350", "protein_g": 32, "sodium_mg": null, "confidence": "medium" }
+      ],
+      "summary": "단백질이 충분한 저녁입니다."
+    }
+  },
+  {
+    "sample_id": "A5",
+    "received_at": "2026-09-10T22:30:00+09:00",
+    "message_id": "M-105",
+    "caption": "야식",
+    "output": {
+      "is_food": true,
+      "meal_type": "야식",
+      "foods": [
+        { "food_name": "컵라면", "amount": "1개", "calories": 500, "protein_g": 10, "sodium_mg": 1800, "confidence": "high" }
+      ],
+      "summary": "늦은 시간에 먹은 나트륨이 높은 음식입니다."
+    }
+  }
+]
