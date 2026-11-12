@@ -1,0 +1,70 @@
+{
+  "description": "하루마켓 웹 문의 양식이 보내는 요청 본문 6건. 실습 3-6에서 body 부분만 골라 보낸다. 가상 데이터다.",
+  "form_fields": {
+    "name": "문의한 사람이 입력한 이름",
+    "order_no": "주문번호 입력칸. 비워 둘 수 있다",
+    "content": "문의 내용",
+    "agree_privacy": "개인정보 수집 동의 체크. 체크하지 않으면 양식이 보내지지 않으므로 항상 true다"
+  },
+  "requests": [
+    {
+      "case": "W-1",
+      "purpose": "정상. 반품 요청이고 필수 값이 모두 있다",
+      "body": {
+        "name": "최민지",
+        "order_no": "O-1004",
+        "content": "셔츠 사이즈가 생각보다 커서 반품하고 싶어요. 입어 보지는 않았고 택도 그대로 있어요.",
+        "agree_privacy": true
+      }
+    },
+    {
+      "case": "W-2",
+      "purpose": "주문번호 칸을 비워서 보냈다. 빈 문자열이 온다",
+      "body": {
+        "name": "송하은",
+        "order_no": "",
+        "content": "사이즈가 안 맞아서 원피스를 반품하려고요. 주문번호는 못 찾겠어요.",
+        "agree_privacy": true
+      }
+    },
+    {
+      "case": "W-3",
+      "purpose": "이름 칸이 아예 오지 않았다. 필드 자체가 없다",
+      "body": {
+        "order_no": "O-2001",
+        "content": "티셔츠를 L 사이즈로 교환하고 싶습니다.",
+        "agree_privacy": true
+      }
+    },
+    {
+      "case": "W-4",
+      "purpose": "문의 내용이 비어 있다",
+      "body": {
+        "name": "정하람",
+        "order_no": "O-1007",
+        "content": "   ",
+        "agree_privacy": true
+      }
+    },
+    {
+      "case": "W-5",
+      "purpose": "주문번호 형식이 계약과 다르다",
+      "body": {
+        "name": "윤재호",
+        "order_no": "1012",
+        "content": "주문한 캠핑 의자를 취소하고 싶어요. 아직 안 보내셨죠?",
+        "agree_privacy": true
+      }
+    },
+    {
+      "case": "W-6",
+      "purpose": "앞뒤 공백이 섞여 있고, 반품과 교환이 한 문장에 함께 들어 있다",
+      "body": {
+        "name": " 고다인 ",
+        "order_no": " O-2011 ",
+        "content": "슬리퍼가 발에 안 맞는데 한 치수 큰 걸로 바꾸거나 그냥 환불받고 싶어요.",
+        "agree_privacy": true
+      }
+    }
+  ]
+}

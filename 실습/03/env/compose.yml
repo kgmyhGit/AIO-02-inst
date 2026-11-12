@@ -1,0 +1,81 @@
+# 3장 실습용 n8n 실행 구성
+#
+# 서비스 두 개로 이루어진다.
+#   db  : PostgreSQL. 안에 데이터베이스 세 개를 둔다.
+#         - n8n        : n8n이 워크플로우, 자격 증명, 실행 기록을 저장하는 내부 저장 데이터베이스
+#         - harumarket : 업무 데이터베이스. 문의 기록과 요청 기록을 저장한다
+#         - n8n_exam   : 예제용 데이터베이스. 워크플로우 예제에서 DB 연동을 연습할 때 쓴다
+#   n8n : n8n 본체. 브라우저로 http://localhost:5678 에 접속한다
+#
+# 사용 방법은 3장 실습 문서의 '실습 3-1'을 따른다.
+# 같은 폴더에 .env 파일이 있어야 한다. 값은 환경변수_예시.env를 참고한다.
+
+name: n8n-textbook
+
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    ports:
+      # 왼쪽이 내 컴퓨터의 포트, 오른쪽이 컨테이너 안의 포트다.
+      # 5432가 이미 쓰이고 있으면 왼쪽 숫자만 바꾼다(예: "15432:5432").
+      - "5432:5432"
+    environment:
+      # 이 사용자와 비밀번호로 세 데이터베이스에 모두 접속한다.
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      # 컨테이너를 처음 만들 때 이 이름의 데이터베이스가 생긴다. n8n의 내부 저장 데이터베이스다.
+      POSTGRES_DB: n8n
+      TZ: ${TIMEZONE}
+    volumes:
+      # 데이터베이스의 실제 데이터. 이 볼륨을 지우면 세 데이터베이스가 모두 사라진다.
+      - db_data:/var/lib/postgresql/data
+      # 아래 두 스크립트는 db_data 볼륨이 비어 있을 때 딱 한 번 실행된다.
+      - ./업무DB_초기화.sql:/docker-entrypoint-initdb.d/10-harumarket.sql:ro
+      # 예제용 데이터베이스 n8n_exam을 만든다. 위 스크립트 다음에 실행된다.
+      - ./예제DB_초기화.sql:/docker-entrypoint-initdb.d/20-n8n-exam.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d n8n"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  n8n:
+    image: n8nio/n8n:2.43.7
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      # 왼쪽이 내 컴퓨터의 포트, 오른쪽이 컨테이너 안의 포트다.
+      # 5678이 이미 쓰이고 있으면 왼쪽 숫자만 바꾼다(예: "15678:5678").
+      - "5678:5678"
+    environment:
+      # 내부 저장 데이터베이스를 PostgreSQL로 지정한다.
+      # 호스트 이름은 localhost가 아니라 위에서 정한 서비스 이름 db다.
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: db
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_USER: ${POSTGRES_USER}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
+      # 자격 증명을 암호화하는 키. 이 값을 잃으면 저장한 자격 증명을 되살릴 수 없다.
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+      # GENERIC_TIMEZONE: 일정으로 실행하는 트리거의 기준 시간대
+      # TZ: 컨테이너 시스템의 시간대
+      GENERIC_TIMEZONE: ${TIMEZONE}
+      TZ: ${TIMEZONE}
+      N8N_RUNNERS_ENABLED: "true"
+      # 외부 서비스가 n8n을 호출할 공개 주소. Webhook 노드의 주소를 이 값으로 만든다.
+      N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL}
+      # n8n 앞에서 요청을 전달하는 프록시의 수. ngrok 하나이므로 1이다.
+      N8N_PROXY_HOPS: 1
+      # 편집 화면 주소. OAuth 콜백 주소와 실행 기록 링크도 이 값으로 만든다. 포트를 바꾸면 이 번호도 바꾼다.
+      N8N_EDITOR_BASE_URL: http://localhost:5678
+    volumes:
+      # n8n의 설정 디렉터리. 이 볼륨이 없으면 컨테이너를 다시 만들 때 설정이 사라진다.
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  n8n_data:
+  db_data:

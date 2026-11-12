@@ -1,0 +1,102 @@
+{
+  "description": "하루마켓 고객지원 메일함에 들어온 교환·주문 취소 문의 10통. 실습 3-7에서 사용한다. 2장 교환 사례를 메일 형식으로 다시 쓴 가상 데이터다.",
+  "mail_fields": {
+    "from_name": "보낸 사람 표시 이름. 비어 있을 수 있다",
+    "from_address": "보낸 사람 메일 주소",
+    "subject": "제목",
+    "text": "본문",
+    "received_at": "메일함이 기록한 도착 시각"
+  },
+  "mails": [
+    {
+      "case": "M-1",
+      "purpose": "정상. 교환 요청이고 본문에 주문번호가 있다",
+      "from_name": "오승현",
+      "from_address": "oshyun@example.com",
+      "subject": "교환 문의드립니다",
+      "text": "안녕하세요. O-2001 주문으로 받은 티셔츠 M 사이즈가 작아요. L 사이즈로 교환하고 싶습니다.",
+      "received_at": "2026-09-10T08:55:00+09:00"
+    },
+    {
+      "case": "M-2",
+      "purpose": "본문에 주문번호가 두 개 있다. 취소 대상은 하나뿐이다",
+      "from_name": "배현우",
+      "from_address": "hyunwoo.bae@example.com",
+      "subject": "중복 주문 취소 요청",
+      "text": "같은 스피커를 실수로 두 번 주문했습니다. O-2005와 O-2006 중에서 O-2006 주문을 취소해 주세요.",
+      "received_at": "2026-09-10T12:05:00+09:00"
+    },
+    {
+      "case": "M-3",
+      "purpose": "주문번호가 제목에만 있다",
+      "from_name": "고다인",
+      "from_address": "dain.ko@example.com",
+      "subject": "[O-2011] 슬리퍼 교환 요청",
+      "text": "슬리퍼가 발에 안 맞아서 교환하고 싶어요. 한 치수 큰 것으로 부탁드립니다.",
+      "received_at": "2026-09-10T10:40:00+09:00"
+    },
+    {
+      "case": "M-4",
+      "purpose": "주문번호가 어디에도 없다",
+      "from_name": "문가온",
+      "from_address": "gaon.moon@example.com",
+      "subject": "취소 요청",
+      "text": "지난주에 주문한 것 취소해 주세요.",
+      "received_at": "2026-09-10T15:00:00+09:00"
+    },
+    {
+      "case": "M-5",
+      "purpose": "부분 취소 문의. 자동으로 처리할 유형인지 분명하지 않다",
+      "from_name": "노하준",
+      "from_address": "hajun.noh@example.com",
+      "subject": "일부만 취소 가능한가요",
+      "text": "주방 수건 세트를 3개 주문했는데 1개만 취소할 수 있나요? 주문번호는 O-2010입니다.",
+      "received_at": "2026-09-10T16:30:00+09:00"
+    },
+    {
+      "case": "M-6",
+      "purpose": "보낸 사람 표시 이름에 영문 표기가 함께 있다",
+      "from_name": "윤지우 (Jiwoo Yoon)",
+      "from_address": "jiwoo.yoon@example.com",
+      "subject": "후드 집업 사이즈 교환",
+      "text": "후드 집업 그레이 L을 그레이 M으로 교환 원합니다. 주문번호는 O-2012입니다.",
+      "received_at": "2026-09-10T13:15:00+09:00"
+    },
+    {
+      "case": "M-7",
+      "purpose": "이미 신청한 건에 대한 재문의. 같은 주문번호가 다시 온다",
+      "from_name": "오승현",
+      "from_address": "oshyun@example.com",
+      "subject": "Re: 교환 문의드립니다",
+      "text": "O-2001 건 L 사이즈로 교환 신청했는데 진행 상황이 궁금합니다.",
+      "received_at": "2026-09-14T10:05:00+09:00"
+    },
+    {
+      "case": "M-8",
+      "purpose": "주문번호를 숫자만 적었다. 계약의 형식과 다르다",
+      "from_name": "남예준",
+      "from_address": "yejun.nam@example.com",
+      "subject": "사이즈 교환",
+      "text": "티셔츠 L이 커서 M으로 교환하고 싶어요. 주문번호 2013입니다.",
+      "received_at": "2026-09-10T13:50:00+09:00"
+    },
+    {
+      "case": "M-9",
+      "purpose": "보낸 사람 표시 이름이 비어 있고, 도착 시각의 표기 형식이 다르다",
+      "from_name": "",
+      "from_address": "yerin.shin@example.com",
+      "subject": "주문 취소 부탁드려요",
+      "text": "에어프라이어 주문 O-2007을 취소하고 싶습니다. 다른 곳에서 더 싸게 샀어요.",
+      "received_at": "Thu, 10 Sep 2026 13:40:00 +0900"
+    },
+    {
+      "case": "M-10",
+      "purpose": "주문번호를 소문자로 적었다",
+      "from_name": "권하린",
+      "from_address": "harin.kwon@example.com",
+      "subject": "슬리퍼 교환 요청",
+      "text": "슬리퍼 250이 작아서 260으로 교환 부탁드립니다. 주문번호는 o-2014예요.",
+      "received_at": "2026-09-10T14:20:00+09:00"
+    }
+  ]
+}
