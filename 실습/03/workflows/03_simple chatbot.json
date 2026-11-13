@@ -1,0 +1,97 @@
+{
+  "name": "03_simple chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -384,
+        -96
+      ],
+      "id": "af532572-b59f-40d2-84c8-7c96582f7a9b",
+      "name": "When chat message received",
+      "webhookId": "52c8d6cf-2109-4faf-9c91-1cd928decee1"
+    },
+    {
+      "parameters": {
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -160,
+        -96
+      ],
+      "id": "7559fffa-1535-4091-ad3a-62b66c5e4d54",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-6-luna"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -224,
+        80
+      ],
+      "id": "bf9e7461-4ed0-4e16-abc1-a09a651c1e69",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "0aIIz13kma79hikH",
+          "name": "OpenAI account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f0f4b62e-d7ee-463b-b405-504ded035d73",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae"
+  },
+  "nodeGroups": [],
+  "id": "a49WM7GMSJ72mZTZ",
+  "tags": []
+}

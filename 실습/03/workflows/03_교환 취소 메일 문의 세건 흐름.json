@@ -1,0 +1,304 @@
+{
+  "name": "03_교환 취소 메일 문의 세건 흐름",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        -64
+      ],
+      "id": "b2c93c76-4b77-41dc-9c84-ef44bf68c57c",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ac8ba856-9d71-4486-998a-a31a89acf58b",
+              "name": "customer_name",
+              "value": "={{ $ifEmpty($json.from_name, \"\").trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "e95c8bcd-c324-49c1-ad76-d02a67a1343b",
+              "name": "message",
+              "value": "={{ $json.message.trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "08923a8b-6775-4abb-a37a-81a961a4157c",
+              "name": "request_type",
+              "value": "={{ $json.request_type }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -32,
+        -64
+      ],
+      "id": "f2b8648e-781e-4832-8477-a21249e3158c",
+      "name": "값 다듬기"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a6d8ba35-50f2-4df9-99e9-ebffe75f9f22",
+              "leftValue": "={{ $json.customer_name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        176,
+        -64
+      ],
+      "id": "c87b3a24-4813-4625-aff5-6b4ed42602ea",
+      "name": "필수입력값 확인"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        400,
+        64
+      ],
+      "id": "e1ad9e06-7c38-4b5f-b78a-f9e90d30864b",
+      "name": "고객에게 이름 요청"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        400,
+        -144
+      ],
+      "id": "b62e38c7-9b85-490a-88df-87073a90f8f9",
+      "name": "문의 기록 생성"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.request_type }}",
+                    "rightValue": "exchange",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "696c38c2-7e0d-4618-aaa8-58aa93f3b6d5"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "교환"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "19d95d45-f979-4711-84dd-a559575eb388",
+                    "leftValue": "={{ $json.request_type }}",
+                    "rightValue": "cancel",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "취소"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        608,
+        -144
+      ],
+      "id": "1cb685db-1b12-4ca2-a3e4-1da330caa27f",
+      "name": "요청 분류"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        864,
+        -240
+      ],
+      "id": "64198b9c-e206-4470-ae6c-f50d1020ff2f",
+      "name": "교환 처리 경로"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        864,
+        -64
+      ],
+      "id": "0a333f79-9044-4ec4-8b5f-dda3f7d25a4e",
+      "name": "취소 처리 경로"
+    }
+  ],
+  "pinData": {
+    "When clicking ‘Execute workflow’": [
+      {
+        "json": {
+          "from_name": "  김하늘 ",
+          "order_no": "O-1004",
+          "request_type": "exchange",
+          "message": "사이즈를 M으로 바꾸고 싶어요. "
+        }
+      },
+      {
+        "json": {
+          "from_name": "박민수",
+          "order_no": "O-1007",
+          "request_type": "cancel",
+          "message": " 주문을 취소해 주세요."
+        }
+      },
+      {
+        "json": {
+          "order_no": "O-1011",
+          "request_type": "exchange",
+          "message": "색상 교환 가능한가요?"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "값 다듬기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "값 다듬기": {
+      "main": [
+        [
+          {
+            "node": "필수입력값 확인",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "필수입력값 확인": {
+      "main": [
+        [
+          {
+            "node": "문의 기록 생성",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "고객에게 이름 요청",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "문의 기록 생성": {
+      "main": [
+        [
+          {
+            "node": "요청 분류",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "요청 분류": {
+      "main": [
+        [
+          {
+            "node": "교환 처리 경로",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "취소 처리 경로",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6da4a630-4f73-4ae0-80f1-dca88f2d5154",
+  "meta": {
+    "instanceId": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae"
+  },
+  "nodeGroups": [],
+  "id": "zD9UdF40lURLywPB",
+  "tags": []
+}

@@ -1,0 +1,269 @@
+{
+  "name": "03_뉴스기사 필터",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -480,
+        -112
+      ],
+      "id": "eb06577b-be36-4838-a4d1-36732e193727",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"collected_at\": \"2026-09-16T07:00:00+09:00\",\n  \"keyword\": \"AI\",\n  \"articles\": [\n    {\n      \"id\": \"N-001\",\n      \"title\": \"국내 제조사, AI 검사 설비 도입 확대\",\n      \"summary\": \"생산 라인의 불량 검사에 영상 판독 설비를 늘리기로 했다고 밝혔다.\",\n      \"category\": \"산업\",\n      \"published_at\": \"2026-09-16T06:20:00+09:00\",\n      \"source\": \"가상경제신문\"\n    },\n    {\n      \"id\": \"N-002\",\n      \"title\": \"물류 자동화 설비 수주 증가\",\n      \"summary\": \"창고 운영에 AI 기반 적재 계획을 적용한 사례가 늘고 있다.\",\n      \"category\": \"산업\",\n      \"published_at\": \"2026-09-16T05:48:00+09:00\",\n      \"source\": \"가상산업일보\"\n    },\n    {\n      \"id\": \"N-003\",\n      \"title\": \"ai 교육 과정 수강생 두 배로\",\n      \"summary\": \"직무 재교육 과정의 신청자가 지난해보다 늘었다.\",\n      \"category\": \"교육\",\n      \"published_at\": \"2026-09-15T18:10:00+09:00\",\n      \"source\": \"가상교육신문\"\n    },\n    {\n      \"id\": \"N-004\",\n      \"title\": \"SUPPLY CHAIN 관리 세미나 개최 안내\",\n      \"summary\": \"공급망 위험 관리 사례를 다루는 행사가 다음 달 열린다.\",\n      \"category\": \"행사\",\n      \"published_at\": \"2026-09-15T14:05:00+09:00\",\n      \"source\": \"가상물류뉴스\"\n    },\n    {\n      \"id\": \"N-005\",\n      \"title\": \"중고 거래 플랫폼 이용자 증가\",\n      \"summary\": \"생활용품 거래 건수가 석 달 연속 늘었다고 발표했다.\",\n      \"category\": \"\",\n      \"published_at\": \"2026-09-15T11:30:00+09:00\",\n      \"source\": \"가상생활신문\"\n    },\n    {\n      \"id\": \"N-006\",\n      \"title\": \"AI 윤리 지침 초안 공개\",\n      \"summary\": \"업계 협회가 자율 지침의 초안을 내놓고 의견을 받는다.\",\n      \"category\": \"정책\",\n      \"published_at\": \"2026-09-14\",\n      \"source\": \"가상정책저널\"\n    },\n    {\n      \"id\": \"N-007\",\n      \"title\": \"사내 문서 검색 도구 개편\",\n      \"summary\": \"부서별로 흩어진 자료를 한곳에서 찾도록 화면을 바꿨다.\",\n      \"category\": \"IT\",\n      \"published_at\": \"2026-09-14T09:12:00+09:00\",\n      \"source\": \"가상테크리뷰\"\n    },\n    {\n      \"id\": \"N-008\",\n      \"title\": \"국내 제조사, AI 검사 설비 도입 확대\",\n      \"summary\": \"생산 라인의 불량 검사에 영상 판독 설비를 늘리기로 했다고 밝혔다.\",\n      \"category\": \"산업\",\n      \"published_at\": \"2026-09-16T06:20:00+09:00\",\n      \"source\": \"가상경제신문\"\n    }\n  ]\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -272,
+        -112
+      ],
+      "id": "81276f1e-4419-4d40-b951-45a10dfbd891",
+      "name": "뉴스기사 수집"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "articles",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1.1,
+      "position": [
+        -32,
+        -112
+      ],
+      "id": "ea0ea4fe-b62e-4980-816d-a6b15d74982c",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f89eeca5-6eb6-46b8-8bac-00365fd35939",
+              "leftValue": "={{ $json.title.toLowerCase() }}",
+              "rightValue": "ai",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "fcb6f256-9900-4d25-88aa-df4cc3dfc817",
+              "leftValue": "={{ $json.summary.toLowerCase() }}",
+              "rightValue": "ai",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        176,
+        -256
+      ],
+      "id": "380b6662-33c7-4b97-a20c-f41e07a3fd09",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "title",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        416,
+        -80
+      ],
+      "id": "46c7f0a4-765f-4133-a3c0-55bf0890273b",
+      "name": "Remove Duplicates"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4535e7eb-00aa-406d-8ab5-516adfe3950d",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "5a3af7bc-3e35-4b8a-a47e-d74d3efbe3ff",
+              "name": "published_at",
+              "value": "={{ $json.published_at }}",
+              "type": "string"
+            },
+            {
+              "id": "e40fd5d2-e24b-4dbc-a9db-d7bb77947060",
+              "name": "source",
+              "value": "={{ $json.source }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        624,
+        -80
+      ],
+      "id": "52218673-0755-48a3-a113-89a4a1e0bbdf",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3d967bbb-2b75-4ca7-b8ae-bce68fed19b0",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "ai",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "9e9a3096-97f8-4cce-9c50-f848f8e0236a",
+              "leftValue": "={{ $json.summary }}",
+              "rightValue": "ai",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        176,
+        -80
+      ],
+      "id": "4271497b-04b1-49c5-9f3a-4ed62eac1428",
+      "name": "Filter"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "뉴스기사 수집",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "뉴스기사 수집": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        []
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a3be4b27-0f4d-4a13-8ca9-f77b83d71c1e",
+  "meta": {
+    "instanceId": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae"
+  },
+  "nodeGroups": [],
+  "id": "g8NTPcQSp4AX25yM",
+  "tags": []
+}

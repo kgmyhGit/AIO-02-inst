@@ -1,0 +1,238 @@
+{
+  "name": "03_노드간 데이터 흐름 연습",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "98fe0abe-5067-400a-aef9-3aa7274a45d2",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "content": "## Edit Fields (Set)\n\n- 앞 노드에서 받은 아이템들의 필드들을 수정, 추가 등 변경할 때 사용 노드\n- 필드 이름, 필드의 값 모두 변경 가능.",
+        "width": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        16,
+        -128
+      ],
+      "typeVersion": 1,
+      "id": "5b701804-dc88-486b-9ceb-d299259a7203",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"category\":\"sports\",\n  \"articles\": [\n    { \"title\": \"기사 1\" },\n    { \"title\": \"기사 2\" },\n    { \"title\": \"기사 3\" }\n  ]\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        192,
+        0
+      ],
+      "id": "c51c84bd-b98c-4a0a-84dc-0672912a6ecf",
+      "name": "사용할 값들 생성"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8c997e43-6acc-407e-9ba3-b80086fd28c8",
+              "name": "첫번째기사제목",
+              "value": "={{ $json.articles[1].title }}",
+              "type": "string"
+            },
+            {
+              "id": "f4882c7a-de77-409e-aa07-e48c18365ee1",
+              "name": "new_field",
+              "value": 20.122,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        400,
+        -32
+      ],
+      "id": "8a026fd0-24a1-49ae-9436-2eebef411e9b",
+      "name": "첫번째 기사 제목만 추출"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "articles",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1.1,
+      "position": [
+        400,
+        160
+      ],
+      "id": "40f1cc75-4bca-41e1-85b8-c8210d7c6456",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "content": "## split out\n\n- 배열 필드의 원소들을 나눠 출력",
+        "height": 112
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        128,
+        208
+      ],
+      "typeVersion": 1,
+      "id": "ffdc1294-39e6-4c0f-91f3-d854896a7079",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ce448c30-a7b4-40f3-98dc-5a2213d06513",
+              "name": "new_title",
+              "value": "={{ \"제목: \" + $json.title }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        608,
+        160
+      ],
+      "id": "30748841-93a7-491f-8bfa-b58fb337708b",
+      "name": "title 변경"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bec07bf7-40f9-4fd0-8bb6-ce92b76d0f7d",
+              "name": "first_title",
+              "value": "={{ $json.news[0].new_title }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        960,
+        176
+      ],
+      "id": "8d35376e-af83-4a78-ba4c-5333202164e4",
+      "name": "첫번째 기사 제목만 추출2"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "news",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        800,
+        160
+      ],
+      "id": "0c5d5bdf-b234-411f-8ac4-6c3ff2aec8d1",
+      "name": "Aggregate"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "사용할 값들 생성",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "사용할 값들 생성": {
+      "main": [
+        [
+          {
+            "node": "첫번째 기사 제목만 추출",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "title 변경",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "title 변경": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "첫번째 기사 제목만 추출2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "44cc3340-917c-4202-850d-223675f4efc1",
+  "meta": {
+    "instanceId": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae"
+  },
+  "nodeGroups": [],
+  "id": "Cei1RNSStmFGMtO3",
+  "tags": []
+}
