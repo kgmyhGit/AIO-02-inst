@@ -1,0 +1,153 @@
+{
+  "name": "03_Daum 경제뉴스 수집",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 5
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -384,
+        -48
+      ],
+      "id": "2d687620-a51f-436e-987b-2cf317848ede",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "content": "## 다음 뉴스 HTTP 요청\n\n- Http Request 노드 이용 (http 요청 처리)",
+        "height": 464,
+        "width": 608
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -272,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "5fcfd276-f810-4278-8f90-d3852553eb3b",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "url": "https://news.daum.net/economy",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -192,
+        -48
+      ],
+      "id": "4a10e989-893b-4f37-9ad1-a7690fd8130f",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "link_title",
+              "cssSelector": "#\\30 e289a02-ba69-440a-8a28-2b0479c64993 > ul > li > a > div.cont_thumb > strong",
+              "returnArray": true
+            },
+            {
+              "key": "link_href",
+              "cssSelector": "#\\30 e289a02-ba69-440a-8a28-2b0479c64993 > ul > li > a ",
+              "returnValue": "attribute",
+              "attribute": "href",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        32,
+        -48
+      ],
+      "id": "8990c132-55c6-44ee-888a-a872325bddf2",
+      "name": "HTML"
+    }
+  ],
+  "pinData": {
+    "HTML": [
+      {
+        "json": {
+          "link_title": [
+            "호텔 뷔페 한끼 어쩌다 '23만5000원' 됐나 [뷔페 가격의 비밀①]",
+            "공정위, 카카오·티맵 대리운전 ‘보험 강요’ 의혹 동의의결 절차 개시",
+            "\"제철 농산물 장바구니 킵하세요\" 가을 배추 27.9%↓ · 노지 감귤수산식품유통공사 대리",
+            "\"12월 지옥같은 한달온다!\" 블루쓰나미→젠슨황 리스크에 이은 '충격파' 경고",
+            "30대 집주인 9년 만에 증가…인구 증가에 '막차'·정책대출 수요 겹쳐",
+            "\"반도체·비반도체 임금 격차 해소하려면…선제적 구조개편·소득보전 필요\"",
+            "“빚 때문에 하루 12명 자살 내몰려” 276만 연체자 빚 작년 54.5조 육박",
+            "내 주식 비싸게 사준다는데…이사회는 왜 침묵하나? [지배구조 이야기③]",
+            "[경제 포커스] 월급쟁이 과세 기준·공제 한도, 10년 넘게 제자리 걸음"
+          ],
+          "link_href": [
+            "https://v.daum.net/v/20261116121856655",
+            "https://v.daum.net/v/20261116121421531",
+            "https://v.daum.net/v/20261116121010452",
+            "https://v.daum.net/v/20261116121010451",
+            "https://v.daum.net/v/20261116120205052",
+            "https://v.daum.net/v/20261116120159041",
+            "https://v.daum.net/v/20261116114813480",
+            "https://v.daum.net/v/20261116114628408",
+            "https://v.daum.net/v/20261116114541384"
+          ]
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3f95584c-18a7-4f4f-9216-c3eb15e21164",
+  "meta": {
+    "instanceId": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae"
+  },
+  "nodeGroups": [],
+  "id": "WtBBDPLJ5ygtF0HM",
+  "tags": []
+}
