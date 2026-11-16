@@ -1,0 +1,249 @@
+{
+  "name": "03_하루마켓_웹문의처리",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "harumarket-inquiry",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "de487160-f45c-47c5-aba3-183010670ed9",
+      "name": "Webhook",
+      "webhookId": "9f7ec9df-948a-4173-83cd-f8f743cd23b6"
+    },
+    {
+      "parameters": {
+        "content": "## Webhook 트리거 노드\n\n- 지정한 URL로 웹(http, https) 요청이 들어오면 시작되는 트리거노드.\n- API 서비스를 workflow 로 구현할 때 사용.\n- 설정\n    - 요청방식: GET, POST, PUT, DELETE, PATCH\n    - 요청경로\n    - 인증",
+        "height": 304,
+        "width": 416
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -192,
+        -176
+      ],
+      "typeVersion": 1,
+      "id": "f6d53018-1335-4f63-8c48-dadd7ab193f1",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "13f2f6f1-23fd-40c2-ae1b-7f4715e6f96b",
+              "name": "name_raw",
+              "value": "={{ $ifEmpty($json.body.name, \"\").trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "e76bfeba-f18e-480b-abb8-bea52c65141e",
+              "name": "order_no_raw",
+              "value": "={{ $ifEmpty($json.body.order_no, \"\").trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "a16d0a63-b16f-4414-aa00-87c557439e53",
+              "name": "content_raw",
+              "value": "={{ $ifEmpty($json.body.content, \"\").trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        -96
+      ],
+      "id": "1dd2f96f-271e-4087-aa6a-fef1ef4b9933",
+      "name": "문의내용 다듬기"
+    },
+    {
+      "parameters": {
+        "content": "## 필수 입력 값이 들어왔는지 확인\n\n- 이름, 본문 -> 필수\n- 분기\n    - if : 조건 하나에 true, false 두 개 경로\n    - switch: 조건이 여러개인 경우",
+        "height": 320,
+        "width": 336
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        320,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "798220ae-c207-4672-b934-f87248ec941a",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.name_raw }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "empty",
+                      "singleValue": true
+                    },
+                    "id": "817f1a13-d523-4813-ac1f-643f2e6364f4"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "이름 빈값"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "ee91f235-f00c-4093-9117-57fb7143a64a",
+                    "leftValue": "={{ $json.content_raw }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "empty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "본문 빈값"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "91bd308d-136d-4363-991f-fa59748e41f9",
+                    "leftValue": "={{ $json.order_no_raw }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "empty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "주문번호 빈값"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "정상"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        384,
+        -48
+      ],
+      "id": "4c6c6851-d88b-42ea-94e4-fb754bac4a3b",
+      "name": "Switch"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "glisten-italicize-designate.ngrok-free.dev",
+            "user-agent": "curl/8.22.0",
+            "content-length": "222",
+            "accept": "*/*",
+            "content-type": "application/json;charset=utf-8",
+            "x-forwarded-for": "221.150.57.50",
+            "x-forwarded-host": "glisten-italicize-designate.ngrok-free.dev",
+            "x-forwarded-proto": "https",
+            "accept-encoding": "gzip"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "name": "최민지",
+            "order_no": "O-1004",
+            "content": "셔츠 사이즈가 생각보다 커서 반품하고 싶어요. 입어 보지는 않았고 택도 그대로 있어요.",
+            "agree_privacy": true
+          },
+          "webhookUrl": "https://glisten-italicize-designate.ngrok-free.dev/webhook-test/harumarket-inquiry",
+          "executionMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "문의내용 다듬기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "문의내용 다듬기": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "20899c6c-d5cf-4a9c-967a-150c6769cbca",
+  "meta": {
+    "instanceId": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae"
+  },
+  "nodeGroups": [],
+  "id": "NgjK2tc6zm31xdDn",
+  "tags": []
+}

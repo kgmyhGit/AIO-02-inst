@@ -6,7 +6,7 @@
         "rule": {
           "interval": [
             {
-              "triggerAtHour": 6
+              "triggerAtHour": 12
             }
           ]
         }
@@ -41,7 +41,7 @@
       "type": "n8n-nodes-base.limit",
       "typeVersion": 1,
       "position": [
-        -32,
+        -80,
         -48
       ],
       "id": "1fd66755-ea6c-4fe1-8363-be701df73e26",
@@ -49,7 +49,7 @@
     },
     {
       "parameters": {
-        "sendTo": "kgmyh73@gmail.com",
+        "sendTo": "kgmyhsec@gmail.com",
         "subject": "={{ $today.format(\"yyyy-MM-dd\")  + \" 주식 뉴스레터\"  }}",
         "emailType": "text",
         "message": "=오늘의 주식 뉴스레터\n====================================\n{{ $json.data.map(item => item.title+\"\\n링크:\"+item.link+\"\\n발간일시:\"+item.pubDate+\"\\n\\n\").join(\"\") }}\n",
@@ -58,12 +58,18 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        528,
-        -144
+        464,
+        -48
       ],
       "id": "5649c1e8-d14f-42b0-ae32-071357bdf888",
       "name": "수집 뉴스들 메일 전송",
-      "webhookId": "35ea3fc1-19b3-4709-83e6-f5730db926a4"
+      "webhookId": "35ea3fc1-19b3-4709-83e6-f5730db926a4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "aMbnsnCjm6PrLs43",
+          "name": "Gmail account"
+        }
+      }
     },
     {
       "parameters": {
@@ -73,7 +79,7 @@
       "type": "n8n-nodes-base.aggregate",
       "typeVersion": 1,
       "position": [
-        304,
+        256,
         -48
       ],
       "id": "9ade44c1-a7b6-4e2b-b94a-1e2183e5bdd1",
@@ -108,7 +114,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        144,
+        96,
         -48
       ],
       "id": "ac932544-c531-4c80-a34e-a56741b54f3e",
@@ -131,8 +137,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        528,
-        64
+        416,
+        160
       ],
       "id": "0455569b-99bb-4dca-8fde-13b5da90a810",
       "name": "Edit Fields"
@@ -180,11 +186,6 @@
             "node": "수집 뉴스들 메일 전송",
             "type": "main",
             "index": 0
-          },
-          {
-            "node": "Edit Fields",
-            "type": "main",
-            "index": 0
           }
         ]
       ]
@@ -206,8 +207,9 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "650dd86f-560a-4757-b799-dfeda3e587d6",
+  "versionId": "a8039f57-7ccf-4d07-a471-71f367a8f863",
   "meta": {
+    "templateCredsSetupCompleted": true,
     "instanceId": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae"
   },
   "nodeGroups": [],

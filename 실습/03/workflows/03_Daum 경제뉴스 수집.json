@@ -7,7 +7,7 @@
           "interval": [
             {
               "field": "hours",
-              "hoursInterval": 5
+              "hoursInterval": 3
             }
           ]
         }
@@ -25,7 +25,7 @@
       "parameters": {
         "content": "## 다음 뉴스 HTTP 요청\n\n- Http Request 노드 이용 (http 요청 처리)",
         "height": 464,
-        "width": 608
+        "width": 400
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
@@ -74,46 +74,282 @@
       "type": "n8n-nodes-base.html",
       "typeVersion": 1.2,
       "position": [
-        32,
+        -16,
         -48
       ],
       "id": "8990c132-55c6-44ee-888a-a872325bddf2",
       "name": "HTML"
-    }
-  ],
-  "pinData": {
-    "HTML": [
-      {
-        "json": {
-          "link_title": [
-            "호텔 뷔페 한끼 어쩌다 '23만5000원' 됐나 [뷔페 가격의 비밀①]",
-            "공정위, 카카오·티맵 대리운전 ‘보험 강요’ 의혹 동의의결 절차 개시",
-            "\"제철 농산물 장바구니 킵하세요\" 가을 배추 27.9%↓ · 노지 감귤수산식품유통공사 대리",
-            "\"12월 지옥같은 한달온다!\" 블루쓰나미→젠슨황 리스크에 이은 '충격파' 경고",
-            "30대 집주인 9년 만에 증가…인구 증가에 '막차'·정책대출 수요 겹쳐",
-            "\"반도체·비반도체 임금 격차 해소하려면…선제적 구조개편·소득보전 필요\"",
-            "“빚 때문에 하루 12명 자살 내몰려” 276만 연체자 빚 작년 54.5조 육박",
-            "내 주식 비싸게 사준다는데…이사회는 왜 침묵하나? [지배구조 이야기③]",
-            "[경제 포커스] 월급쟁이 과세 기준·공제 한도, 10년 넘게 제자리 걸음"
-          ],
-          "link_href": [
-            "https://v.daum.net/v/20261116121856655",
-            "https://v.daum.net/v/20261116121421531",
-            "https://v.daum.net/v/20261116121010452",
-            "https://v.daum.net/v/20261116121010451",
-            "https://v.daum.net/v/20261116120205052",
-            "https://v.daum.net/v/20261116120159041",
-            "https://v.daum.net/v/20261116114813480",
-            "https://v.daum.net/v/20261116114628408",
-            "https://v.daum.net/v/20261116114541384"
-          ]
+    },
+    {
+      "parameters": {
+        "content": "## 개별 뉴스별로 Item 만들기",
+        "height": 480,
+        "width": 528,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        176,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "997c5a3d-da31-4181-be9c-b2975290577a",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "link_title",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        -128
+      ],
+      "id": "8a4b4d7a-56a9-4e56-b102-f47d0b4234a7",
+      "name": "link_title 분리"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "link_href",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        32
+      ],
+      "id": "19c48a4b-377e-47e0-ae1f-a9e0b31679b0",
+      "name": "link_ref 분리"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        448,
+        -48
+      ],
+      "id": "cc839e3d-18ee-42b1-b71f-e3baf7db45b7",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "content": "## Merge - Combine\n\n- 두 입력의 값을 특정 기준으로 하나의 값을 만들어 준다.\n- combine by: 같은 index(position)의 값끼리 object에 묶어준다."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        448,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "2a2a04fe-16fb-408a-bd0c-ffea6b0e9209",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        880,
+        -64
+      ],
+      "id": "6f0722c8-c43c-4294-8ff1-26f46290c7c0",
+      "name": "개별 뉴스 하나씩 내용 가져오기 -  Loop Over Items"
+    },
+    {
+      "parameters": {
+        "content": "## 개별 뉴스 처리\n\n- 개별 뉴스 주소로 뉴스 기사 내용을 조회\n- 조회한 기사 내용을 db에 저장\n\n### Loop over items 두 경로\n- Item들을 하나씩 개별 처리하는 노드 (for in)\n- loop 경로: 반복 처리하는 흐름 (하나씩 처리)\n- done 경로: 모든 item들을 다 처리하면 진행할 다음 작업 (loop 경로의 결과값들을 모아서 전달)",
+        "height": 352,
+        "width": 944
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        752,
+        -256
+      ],
+      "typeVersion": 1,
+      "id": "81e0ffe6-18bd-49fc-9f9c-aea3f00274a0",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.link_href }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1136,
+        -16
+      ],
+      "id": "169d3d30-7b62-4d6e-b04f-85a913adba32",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public",
+          "cachedResultName": "public",
+          "cachedResultUrl": ""
         },
-        "pairedItem": {
-          "item": 0
+        "table": {
+          "__rl": true,
+          "value": "daumnews",
+          "mode": "list",
+          "cachedResultName": "daumnews"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "content": "={{ $json.content }}",
+            "title": "={{ $('개별 뉴스 하나씩 내용 가져오기 -  Loop Over Items').item.json.link_title }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "num",
+              "displayName": "num",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        1520,
+        -16
+      ],
+      "id": "af7c23d3-6523-4501-b1db-4848b14b69bb",
+      "name": "개별 뉴스 insert",
+      "credentials": {
+        "postgres": {
+          "id": "T6S8CzKEHQ9N6fGD",
+          "name": "n8n_exam DB Account"
         }
       }
-    ]
-  },
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "content",
+              "cssSelector": "#mArticle > div.news_view.fs_type1 > div.article_view > section "
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        1312,
+        -16
+      ],
+      "id": "06067c96-afad-4eb2-b0aa-172164328896",
+      "name": "개별뉴스기사내용 수집"
+    },
+    {
+      "parameters": {
+        "amount": 1.5
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1712,
+        -16
+      ],
+      "id": "a6c53dd4-6d09-475d-90ff-ff8f0dedf69a",
+      "name": "Wait",
+      "webhookId": "6f535430-d184-4c1f-aafd-7c9425348e33"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        -240
+      ],
+      "id": "f133ab0a-cdf5-4258-b296-08f8584cf443",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "={{ $now }} 다음 경제 뉴스 수집 완료. {{ $json.data.length }}건 수집.\nDatabase를 확인하세요.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        1712,
+        -224
+      ],
+      "id": "5c0cb92e-c259-4bd0-97c9-ee768ab51e38",
+      "name": "뉴스저장 알림",
+      "webhookId": "a1a398e9-ec0f-49c4-91cf-f023ec673f8b",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "o5vIXGgaTSluoL4s",
+          "name": "n8n_exam-일반 Webhook"
+        }
+      }
+    }
+  ],
+  "pinData": {},
   "connections": {
     "Schedule Trigger": {
       "main": [
@@ -136,6 +372,128 @@
           }
         ]
       ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "link_title 분리",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "link_ref 분리",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "link_title 분리": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "link_ref 분리": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "개별 뉴스 하나씩 내용 가져오기 -  Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "개별 뉴스 하나씩 내용 가져오기 -  Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "개별뉴스기사내용 수집",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "개별뉴스기사내용 수집": {
+      "main": [
+        [
+          {
+            "node": "개별 뉴스 insert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "개별 뉴스 insert": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "개별 뉴스 하나씩 내용 가져오기 -  Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "뉴스저장 알림",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -143,8 +501,9 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "3f95584c-18a7-4f4f-9216-c3eb15e21164",
+  "versionId": "f80003b4-242d-4130-9bca-0ba654f331cd",
   "meta": {
+    "templateCredsSetupCompleted": true,
     "instanceId": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae"
   },
   "nodeGroups": [],
