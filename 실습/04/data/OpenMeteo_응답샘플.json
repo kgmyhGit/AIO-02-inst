@@ -1,0 +1,21 @@
+{
+  "latitude": 37.55,
+  "longitude": 127.0,
+  "generationtime_ms": 0.07712841033935547,
+  "utc_offset_seconds": 32400,
+  "timezone": "Asia/Seoul",
+  "timezone_abbreviation": "GMT+9",
+  "elevation": 34.0,
+  "daily_units": {
+    "time": "iso8601",
+    "precipitation_probability_max": "%",
+    "temperature_2m_max": "°C",
+    "temperature_2m_min": "°C"
+  },
+  "daily": {
+    "time": ["2026-09-17", "2026-09-18", "2026-09-19"],
+    "precipitation_probability_max": [0, 2, 65],
+    "temperature_2m_max": [26.0, 26.6, 23.1],
+    "temperature_2m_min": [15.5, 17.7, 18.2]
+  }
+}

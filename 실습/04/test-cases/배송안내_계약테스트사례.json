@@ -1,0 +1,50 @@
+{
+  "description": "배송 안내 에이전트 계약 테스트 사례. 실습 4-6의 워크플로우 '계약 테스트 실행'에 붙여 넣는다. order_ids는 웹 문의 처리 워크플로우의 '주문번호 모으기' 노드가 만드는 값과 같다. D-1은 기본 경로와 비교하려고 에이전트에도 넣는다. 가상 데이터다.",
+  "cases": [
+    {
+      "case": "D-1",
+      "customer_name": "이준호",
+      "order_id": "O-1002",
+      "message": "요가 매트 주문했는데 언제쯤 도착할까요?",
+      "order_ids": ["O-1002"],
+      "expected_status": "answered",
+      "expected_answer_null": false
+    },
+    {
+      "case": "D-3",
+      "customer_name": "배현우",
+      "order_id": "O-2005",
+      "message": "스피커를 실수로 두 번 주문했어요. O-2005랑 O-2006 둘 다 언제 출고되나요?",
+      "order_ids": ["O-2005", "O-2006"],
+      "expected_status": "answered",
+      "expected_answer_null": false
+    },
+    {
+      "case": "D-4",
+      "customer_name": "문가온",
+      "order_id": "O-2009",
+      "message": "O-2009 랜턴은 잘 받았어요. 같이 주문한 O-1003 캠핑 의자는 언제 오나요?",
+      "order_ids": ["O-2009", "O-1003"],
+      "expected_status": "handoff",
+      "expected_answer_null": true
+    },
+    {
+      "case": "D-5",
+      "customer_name": "신예린",
+      "order_id": "O-2007",
+      "message": "에어프라이어 O-2007이랑 필터 주문 O-2070은 각각 언제 도착하나요?",
+      "order_ids": ["O-2007", "O-2070"],
+      "expected_status": "handoff",
+      "expected_answer_null": true
+    },
+    {
+      "case": "D-6",
+      "customer_name": "배현우",
+      "order_id": "O-2005",
+      "message": "O-2005, O-2006 말고 2007번 주문도 같이 언제 출고되는지 알려 주세요.",
+      "order_ids": ["O-2005", "O-2006"],
+      "expected_status": "needs_info",
+      "expected_answer_null": false
+    }
+  ]
+}
