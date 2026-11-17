@@ -1,0 +1,466 @@
+{
+  "name": "04_상품현황보고 (중복 상품 제거) - fakestore 예제",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        -48
+      ],
+      "id": "f3c12b7e-f9e2-4cde-9b5d-58aa657c269f",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e4cd572a-4246-466c-9f16-09887006b482",
+              "name": "product_id",
+              "value": "={{ $json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "b9aff27c-1c5c-4c43-852a-66ca22ff7352",
+              "name": "product_name",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "8e08619d-11ea-4806-ad1c-f54fdccb4f5d",
+              "name": "price",
+              "value": "={{ $json.price }}",
+              "type": "number"
+            },
+            {
+              "id": "8a5faeca-54cb-4108-9121-eb228d7ac622",
+              "name": "category",
+              "value": "={{ $json.category }}",
+              "type": "string"
+            },
+            {
+              "id": "530cd35b-b15f-4934-89d6-ec00aa4a9018",
+              "name": "collected_at",
+              "value": "={{ $now.format(\"yyyy-MM-dd HH:mm:ss\") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -48,
+        -48
+      ],
+      "id": "aa702d0d-5a29-460e-ae85-ddcb71eb165b",
+      "name": "저장할 항목 추출"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1wRCTo9U9sJ-EgwAAzHT3BR6eInONJ8xLkcm1ou1YUgA",
+          "mode": "list",
+          "cachedResultName": "상품현황 - fakestore",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wRCTo9U9sJ-EgwAAzHT3BR6eInONJ8xLkcm1ou1YUgA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "products",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wRCTo9U9sJ-EgwAAzHT3BR6eInONJ8xLkcm1ou1YUgA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "product_id",
+              "displayName": "product_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "product_name",
+              "displayName": "product_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "collected_at",
+              "displayName": "collected_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        -48
+      ],
+      "id": "26f7fd08-352b-4cd3-bb31-5102c267bbfa",
+      "name": "상품목록 저장",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "DkTF6dziLlUoFaaj",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "05a280cc-17ef-406d-97e4-dc7048e890f8",
+              "leftValue": "={{ $json.price }}",
+              "rightValue": 500,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        400,
+        -48
+      ],
+      "id": "cccd76d3-5fc1-4564-97bc-7b21f3f80a45",
+      "name": "고가상품 선택"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5e549147-997c-4114-a399-1e070f918bad",
+              "name": "상품 ID",
+              "value": "={{ $json.product_id }}",
+              "type": "number"
+            },
+            {
+              "id": "469773c2-eb1e-43e5-8aca-cc358f243e29",
+              "name": "상품 이름",
+              "value": "={{ $json.product_name }}",
+              "type": "string"
+            },
+            {
+              "id": "575bf695-a983-4097-8aa0-78c6668d20b1",
+              "name": "가격",
+              "value": "={{ $json.price }}",
+              "type": "number"
+            },
+            {
+              "id": "f288824b-8fad-4b80-9087-7b58130bbc6f",
+              "name": "상품 분류",
+              "value": "={{ $json.category }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        592,
+        -48
+      ],
+      "id": "51808495-32d5-4966-a658-f1d978e8ec18",
+      "name": "보고서 컬럼설정"
+    },
+    {
+      "parameters": {
+        "sendTo": "kgmyhsec@gmail.com",
+        "subject": "=고가 상품 보고 - {{ $now.format(\"yyyy-MM-dd\") }}",
+        "message": "=저장한 상품개수: {{ $(\"상품목록 저장\").all().length }}\n<h1>고가상품 목록</h1>\n{{ $json.table }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        -48
+      ],
+      "id": "49a3dac4-b508-446e-b590-dd0f7a4510ba",
+      "name": "Send a message",
+      "webhookId": "7aab6b98-d12e-4735-b01f-830f9e09a0f4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "aMbnsnCjm6PrLs43",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://fakestoreapi.com/products",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -208,
+        -208
+      ],
+      "id": "c8536895-a757-4200-a5a5-5c64f2f84b98",
+      "name": "전체 상품 조회"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1wRCTo9U9sJ-EgwAAzHT3BR6eInONJ8xLkcm1ou1YUgA",
+          "mode": "list",
+          "cachedResultName": "상품현황 - fakestore",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wRCTo9U9sJ-EgwAAzHT3BR6eInONJ8xLkcm1ou1YUgA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "products",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wRCTo9U9sJ-EgwAAzHT3BR6eInONJ8xLkcm1ou1YUgA/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -192,
+        112
+      ],
+      "id": "22375ee9-f763-4951-882e-e00e9d39f620",
+      "name": "Sheet에서 상품 정보 조회",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "DkTF6dziLlUoFaaj",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 이미 저장된 것 걸러내기\n\nmerge : combine - 특정 조건을 기준으로 합친다.\n\ncombine by: matching fields (필드의 값을 기준으로)\n\nfields to match: 기준 필드명 지정\noutput type: 합치는 기준 \n    - Keep Non-Matches (값이 같은것이 없는 item)\noutput data from : 어떤 input의 데이터들을 내보낼 것인지 (input1, input2)",
+        "height": 224,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -16,
+        288
+      ],
+      "typeVersion": 1,
+      "id": "31ff1e02-1985-4fc6-aaab-d42a64cb556e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "product_id",
+        "joinMode": "keepNonMatches",
+        "outputDataFrom": "input1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        80,
+        144
+      ],
+      "id": "fd821ace-79a4-45b4-99cf-5d48e97da9b8",
+      "name": "저장된 상품 제외"
+    },
+    {
+      "parameters": {
+        "operation": "convertToHtmlTable",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        784,
+        -48
+      ],
+      "id": "13ff8dc9-97a9-4874-b08f-96a809c984eb",
+      "name": "테이블 만들기"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "전체 상품 조회",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Sheet에서 상품 정보 조회",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "저장할 항목 추출": {
+      "main": [
+        [
+          {
+            "node": "저장된 상품 제외",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "상품목록 저장": {
+      "main": [
+        [
+          {
+            "node": "고가상품 선택",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "고가상품 선택": {
+      "main": [
+        [
+          {
+            "node": "보고서 컬럼설정",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "보고서 컬럼설정": {
+      "main": [
+        [
+          {
+            "node": "테이블 만들기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "전체 상품 조회": {
+      "main": [
+        [
+          {
+            "node": "저장할 항목 추출",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sheet에서 상품 정보 조회": {
+      "main": [
+        [
+          {
+            "node": "저장된 상품 제외",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "저장된 상품 제외": {
+      "main": [
+        [
+          {
+            "node": "상품목록 저장",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "테이블 만들기": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "7f56fa4a-0865-4015-be2c-b624666d6154",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae"
+  },
+  "nodeGroups": [],
+  "id": "w64eFSlrjIUvMNBo",
+  "tags": []
+}
