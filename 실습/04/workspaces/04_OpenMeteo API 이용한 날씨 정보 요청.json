@@ -1,0 +1,209 @@
+{
+  "name": "04_OpenMeteo API 이용한 날씨 정보 요청",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -560,
+        -112
+      ],
+      "id": "890bd12a-6d6a-40af-a36c-35c3f36ac2e2",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "latitude",
+              "value": "37.5665"
+            },
+            {
+              "name": "longitude",
+              "value": "126.9780"
+            },
+            {
+              "name": "daily",
+              "value": "precipitation_probability_max,temperature_2m_max,temperature_2m_min"
+            },
+            {
+              "name": "timezone",
+              "value": "Asia/Seoul"
+            },
+            {
+              "name": "forecast_days",
+              "value": "3"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -352,
+        -112
+      ],
+      "id": "b1dfa178-01b9-47d9-b011-607a6e49eb2d",
+      "name": "OpenMeteo - 날씨 정보 요청",
+      "retryOnFail": false,
+      "alwaysOutputData": false,
+      "maxTries": 3,
+      "waitBetweenTries": 1000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0a6ff3bd-6f89-48d8-a823-5dad19b080a0",
+              "name": "date",
+              "value": "={{ $json.daily.time[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "0d6b06d7-4a01-499e-af1d-bc052212e53d",
+              "name": "precipitation_probability",
+              "value": "={{ $json.daily.precipitation_probability_max[0] }}",
+              "type": "number"
+            },
+            {
+              "id": "b5e103e7-e415-4a94-b78d-54f34cbc7b10",
+              "name": "temperature_max",
+              "value": "={{ $json.daily.temperature_2m_max[0] }}",
+              "type": "number"
+            },
+            {
+              "id": "608d7155-398a-45f3-b123-45dbbe659fcb",
+              "name": "temperature_min",
+              "value": "={{ $json.daily.temperature_2m_min[0] }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -160,
+        -128
+      ],
+      "id": "66259939-f8ce-4768-a47b-8d6ca4dfed29",
+      "name": "오늘 날씨 정보 조회"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "={{ `날짜: ${$json.date}\n최고기온: ${$json.temperature_max}\n최저기온: ${$json.temperature_min}\n\n${ $json.precipitation_probability >= 50 ? '우산 준비하세요.' : '우산은 필요 없어요'}` }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        80,
+        -128
+      ],
+      "id": "90c9e767-95b7-4fb9-8463-51c1a3ab7a98",
+      "name": "Discord",
+      "webhookId": "f207c467-561b-4499-ae01-3abca277b744",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "vEzHdektGpipPIq8",
+          "name": "n8n_exam 날씨예보채널"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "날씨정보 조회를 실패했습니다.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        -144,
+        80
+      ],
+      "id": "ae3671dc-8cce-4cc1-a08c-e53915cb8bf7",
+      "name": "Discord1",
+      "webhookId": "be53520a-0bd5-4605-b97c-0280ae321f54",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "vEzHdektGpipPIq8",
+          "name": "n8n_exam 날씨예보채널"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "OpenMeteo - 날씨 정보 요청",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenMeteo - 날씨 정보 요청": {
+      "main": [
+        [
+          {
+            "node": "오늘 날씨 정보 조회",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Discord1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "오늘 날씨 정보 조회": {
+      "main": [
+        [
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "09a8f2c6-914a-4080-8943-c21dc900268a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae"
+  },
+  "nodeGroups": [],
+  "id": "nlmz6cVT03UcCevS",
+  "tags": []
+}
