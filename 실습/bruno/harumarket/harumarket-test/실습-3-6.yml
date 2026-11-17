@@ -1,0 +1,22 @@
+info:
+  name: 실습-3-6
+  type: http
+
+http:
+  method: POST
+  url: https://glisten-italicize-designate.ngrok-free.dev/webhook-test/harumarket-inquiry
+  body:
+    type: json
+    data: |-
+      {
+              "order_no": "O-2001",
+              "content": "티셔츠를 L 사이즈로 교환하고 싶습니다.",
+              "agree_privacy": true
+            }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -11,7 +11,7 @@
       "typeVersion": 2.2,
       "position": [
         0,
-        0
+        64
       ],
       "id": "de487160-f45c-47c5-aba3-183010670ed9",
       "name": "Webhook",
@@ -25,8 +25,8 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        -192,
-        -176
+        -160,
+        -80
       ],
       "typeVersion": 1,
       "id": "f6d53018-1335-4f63-8c48-dadd7ab193f1",
@@ -62,7 +62,7 @@
       "typeVersion": 3.5,
       "position": [
         224,
-        -96
+        64
       ],
       "id": "1dd2f96f-271e-4087-aa6a-fef1ef4b9933",
       "name": "문의내용 다듬기"
@@ -75,8 +75,8 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        320,
-        -192
+        336,
+        -80
       ],
       "typeVersion": 1,
       "id": "798220ae-c207-4672-b934-f87248ec941a",
@@ -135,31 +135,6 @@
               },
               "renameOutput": true,
               "outputKey": "본문 빈값"
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 3
-                },
-                "conditions": [
-                  {
-                    "id": "91bd308d-136d-4363-991f-fa59748e41f9",
-                    "leftValue": "={{ $json.order_no_raw }}",
-                    "rightValue": "",
-                    "operator": {
-                      "type": "string",
-                      "operation": "empty",
-                      "singleValue": true
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "주문번호 빈값"
             }
           ]
         },
@@ -171,45 +146,309 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        384,
-        -48
+        448,
+        48
       ],
       "id": "4c6c6851-d88b-42ea-94e4-fb754bac4a3b",
       "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8d37bc93-cd79-45cb-a2f4-50c2474b6f2a",
+              "name": "result",
+              "value": "이름 요청",
+              "type": "string"
+            },
+            {
+              "id": "5fab65e8-2ca8-4743-a7c2-1310a4d1606a",
+              "name": "reason",
+              "value": "고객이름이 제공되지 않았다.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        672,
+        -128
+      ],
+      "id": "e80b506b-5993-4679-b6f9-d9d3e4299fd3",
+      "name": "이름요청메세지"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a87f8463-53e8-4f51-9b6a-494f952936fe",
+              "name": "result",
+              "value": "문의 접수 거절",
+              "type": "string"
+            },
+            {
+              "id": "342f02a9-763c-4225-a8d8-a5b45619f21b",
+              "name": "reason",
+              "value": "문의 메세지 없음",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        672,
+        64
+      ],
+      "id": "5c733718-73f6-4ff8-89d6-09e3b10b5ff7",
+      "name": "접수 처리 실패"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0d29aeed-a697-41da-be80-d4830ca3d22f",
+              "name": "inquiry_id",
+              "value": "INQ-생성된번호",
+              "type": "string"
+            },
+            {
+              "id": "56ac7636-0085-467e-a303-dafec70d9b3f",
+              "name": "received_at",
+              "value": "={{ $now }}",
+              "type": "string"
+            },
+            {
+              "id": "c6b9315f-6e18-4128-a157-95c55db7539f",
+              "name": "channel",
+              "value": "web",
+              "type": "string"
+            },
+            {
+              "id": "adc069c4-c24c-43ba-ae92-a3867e7d7270",
+              "name": "customer_name",
+              "value": "={{ $json.name_raw }}",
+              "type": "string"
+            },
+            {
+              "id": "c6baf13e-9660-4295-b435-5728668614fa",
+              "name": "order_id",
+              "value": "={{ $json.order_no_raw }}",
+              "type": "string"
+            },
+            {
+              "id": "b5307b56-82df-4081-a612-d009ef78b7c9",
+              "name": "message",
+              "value": "={{ $json.content_raw }}",
+              "type": "string"
+            },
+            {
+              "id": "f82daf6c-2ebe-49a1-968b-e95fbbd6aacc",
+              "name": "request_id",
+              "value": "REQ-생성된번호",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        672,
+        256
+      ],
+      "id": "16802ee0-8fcd-4628-8da9-13e98493e7b5",
+      "name": "문의 기록 생성"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "01591de8-5283-47a6-8f8e-bf5b7dca98cf",
+              "leftValue": "={{ $json.order_id }}",
+              "rightValue": "^O-[0-9]{4}$",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        896,
+        256
+      ],
+      "id": "f5121091-b55f-4457-b5bd-65108ede0aec",
+      "name": "주문번호형식확인"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7f7ae334-cda7-4176-857f-639fc9bea7b4",
+              "name": "result",
+              "value": "주문번호 요청",
+              "type": "string"
+            },
+            {
+              "id": "6faf9513-6066-496c-a0aa-862922d915ef",
+              "name": "reason",
+              "value": "잘못된 주문번호 형식",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1120,
+        384
+      ],
+      "id": "e586d22b-16fd-4ec4-b819-a28405ca724b",
+      "name": "주문번호요청"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message }}",
+                    "rightValue": "반품",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "d7657983-ee06-41fd-9f80-1a926f5ba196"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "return"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "623850eb-ac58-48e9-8387-8a600e8755fd",
+                    "leftValue": "={{ $json.message }}",
+                    "rightValue": "환불",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "refund"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f9475a54-7018-4b2d-96ce-1236cca6d392",
+                    "leftValue": "={{ $json.message }}",
+                    "rightValue": "교환",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "exchange"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "b75945e6-408d-4232-a5e7-a1efb88d18b1",
+                    "leftValue": "={{ $json.message }}",
+                    "rightValue": "취소",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "cancel"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "확인필요"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1120,
+        96
+      ],
+      "id": "60c2afda-6205-479b-9165-28005934315e",
+      "name": "문의 요청 분류"
     }
   ],
-  "pinData": {
-    "Webhook": [
-      {
-        "json": {
-          "headers": {
-            "host": "glisten-italicize-designate.ngrok-free.dev",
-            "user-agent": "curl/8.22.0",
-            "content-length": "222",
-            "accept": "*/*",
-            "content-type": "application/json;charset=utf-8",
-            "x-forwarded-for": "221.150.57.50",
-            "x-forwarded-host": "glisten-italicize-designate.ngrok-free.dev",
-            "x-forwarded-proto": "https",
-            "accept-encoding": "gzip"
-          },
-          "params": {},
-          "query": {},
-          "body": {
-            "name": "최민지",
-            "order_no": "O-1004",
-            "content": "셔츠 사이즈가 생각보다 커서 반품하고 싶어요. 입어 보지는 않았고 택도 그대로 있어요.",
-            "agree_privacy": true
-          },
-          "webhookUrl": "https://glisten-italicize-designate.ngrok-free.dev/webhook-test/harumarket-inquiry",
-          "executionMode": "test"
-        },
-        "pairedItem": {
-          "item": 0
-        }
-      }
-    ]
-  },
+  "pinData": {},
   "connections": {
     "Webhook": {
       "main": [
@@ -232,6 +471,60 @@
           }
         ]
       ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "이름요청메세지",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "접수 처리 실패",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "문의 기록 생성",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "문의 기록 생성": {
+      "main": [
+        [
+          {
+            "node": "주문번호형식확인",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "주문번호형식확인": {
+      "main": [
+        [
+          {
+            "node": "문의 요청 분류",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "주문번호요청",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -239,7 +532,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "20899c6c-d5cf-4a9c-967a-150c6769cbca",
+  "versionId": "9f6a843a-9944-4795-86e8-45cb3c9d64c8",
   "meta": {
     "instanceId": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae"
   },
