@@ -1,0 +1,711 @@
+{
+  "name": "04_칼로리기록_사진분석",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "download": true,
+          "imageSize": "large"
+        }
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -32,
+        16
+      ],
+      "id": "525b530f-1f74-4684-bbea-7c1995983fd0",
+      "name": "Telegram Trigger",
+      "webhookId": "c71845c5-11dd-43b8-b544-10ba7e281a61",
+      "credentials": {
+        "telegramApi": {
+          "id": "tVu4mz31dqK4HS7U",
+          "name": "FoodAnalysisBot API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 사진/파일 받기\n\n**on message action**\n- 사진/파일 받기 위해: Additional Fields > Download Image File 켜기",
+        "width": 288
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -224,
+        -96
+      ],
+      "typeVersion": 1,
+      "id": "b09f9353-f022-4897-8811-17d3a42c06ea",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "46d15144-503e-4c83-b15d-8b7373afe4db",
+              "leftValue": "={{ $json.message.photo }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        144,
+        16
+      ],
+      "id": "7515902f-03f1-4141-9182-a96c1e578b4a",
+      "name": "사진 전송 여부"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "음식 사진을 찍어서 전송하세요.",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        352,
+        176
+      ],
+      "id": "c651397b-6cf7-4dc1-9ea8-190e7eac7cdb",
+      "name": "Send a text message",
+      "webhookId": "9f05d07d-218c-4d09-9828-114ab246fdba",
+      "credentials": {
+        "telegramApi": {
+          "id": "tVu4mz31dqK4HS7U",
+          "name": "FoodAnalysisBot API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-6-luna"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        352,
+        -32
+      ],
+      "id": "49209187-be5e-438d-a36d-ea214275b55a",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "0aIIz13kma79hikH",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"is_food\": {\n      \"type\": \"boolean\",\n      \"description\": \"사진에 음식이 있으면 true\"\n    },\n    \"meal_type\": {\n      \"type\": \"string\",\n      \"enum\": [\n        \"아침\",\n        \"점심\",\n        \"저녁\",\n        \"간식\"\n      ]\n    },\n    \"foods\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"food_name\": {\n            \"type\": \"string\",\n            \"description\": \"음식 이름 (한국어)\"\n          },\n          \"amount\": {\n            \"type\": \"string\",\n            \"description\": \"추정 분량, 예: 1공기(210g)\"\n          },\n          \"calories\": {\n            \"type\": \"number\",\n            \"description\": \"kcal\"\n          },\n          \"carbs_g\": {\n            \"type\": \"number\"\n          },\n          \"protein_g\": {\n            \"type\": \"number\"\n          },\n          \"fat_g\": {\n            \"type\": \"number\"\n          },\n          \"sodium_mg\": {\n            \"type\": \"number\"\n          },\n          \"confidence\": {\n            \"type\": \"string\",\n            \"enum\": [\n              \"높음\",\n              \"중간\",\n              \"낮음\"\n            ]\n          }\n        },\n        \"required\": [\n          \"food_name\",\n          \"amount\",\n          \"calories\",\n          \"carbs_g\",\n          \"protein_g\",\n          \"fat_g\",\n          \"sodium_mg\",\n          \"confidence\"\n        ]\n      }\n    },\n    \"summary\": {\n      \"type\": \"string\",\n      \"description\": \"한 줄 총평 (한국어, 60자 이내)\"\n    }\n  },\n  \"required\": [\n    \"is_food\",\n    \"meal_type\",\n    \"foods\",\n    \"summary\"\n  ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        544,
+        -32
+      ],
+      "id": "be153082-c716-4a55-a513-e12c7bce545e",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=- 현재시간: {{ $now }}\n- 사진설명(캡션): {{ $json.message.caption || '없음'}}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "당신은 영양사입니다. 사용자가 보낸 음식 사진을 보고 음식별 칼로리와 영양 성분을 추정합니다.\n\n# 규칙\n- 사진에 보이는 음식을 하나씩 나누어 목록으로 만듭니다. 한 접시에 여러 음식이 있으면 각각 분리합니다.\n- 분량은 사진의 그릇 크기와 일반적인 1인분 기준으로 추정하고, 추정 근거가 되는 분량(g 또는 개수)을 amount에 적습니다.\n- 칼로리와 영양 성분(탄수화물, 단백질, 지방, 나트륨)은 한국 식품의약품안전처 식품영양성분 DB의 일반적인 값을 기준으로 추정합니다.\n- 확신이 낮은 항목은 confidence를 \"낮음\"으로 표시합니다. 모르는 값을 0으로 채우지 말고 가장 그럴듯한 추정값을 적습니다.\n- meal_type은 사용자의 설명(캡션)이 있으면 그것을 우선하고, 없으면 현재 시각(한국 시간)을 기준으로 아침(05~10시), 점심(11~14시), 저녁(17~21시), 그 외 간식으로 정합니다.\n- 사진에 음식이 전혀 없으면 is_food를 false로, foods를 빈 배열로 반환합니다.\n- 모든 문자열은 한국어로 작성합니다."
+            },
+            {
+              "type": "HumanMessagePromptTemplate",
+              "messageType": "imageBinary"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        384,
+        -224
+      ],
+      "id": "c9b9fd44-ec31-4fe6-9121-b9cc44d6fb40",
+      "name": "음식 분석"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "060ed664-4500-4bb0-b71f-3326d2432486",
+              "leftValue": "={{ $json.output.is_food && $json.output.foods.length > 0 }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        752,
+        -224
+      ],
+      "id": "aff88a48-8ed2-4dd2-9af2-24b9e5994e74",
+      "name": "음식사진 여부 확인"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "음식을 식별하지 못했습니다. 음식이 있는 사진을 전송해 주세요. ",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        992,
+        32
+      ],
+      "id": "7eb0b61f-d225-47bf-86e9-098058b7edf0",
+      "name": "Send a text message1",
+      "webhookId": "5598790a-4b13-4e69-9e55-d4c28e105c04",
+      "credentials": {
+        "telegramApi": {
+          "id": "tVu4mz31dqK4HS7U",
+          "name": "FoodAnalysisBot API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output.foods",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1.1,
+      "position": [
+        976,
+        -240
+      ],
+      "id": "4b4402c1-a6e0-451c-935d-781465ac20f4",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4fe77b42-e4d1-468d-9b98-8f2ed30f7cb6",
+              "name": "date",
+              "value": "={{ $now.format('yyyy-MM-dd') }}",
+              "type": "string"
+            },
+            {
+              "id": "787f29a2-2da6-4d4c-9044-9d2b4a7b7003",
+              "name": "time",
+              "value": "={{ $now.format('HH:mm:ss') }}",
+              "type": "string"
+            },
+            {
+              "id": "64c6b98a-d3b6-48f0-9ce1-70d08f35a651",
+              "name": "food_name",
+              "value": "={{ $json.food_name }}",
+              "type": "string"
+            },
+            {
+              "id": "38eaf3fc-1c99-44fa-8c0e-64a61b4911f9",
+              "name": "amount",
+              "value": "={{ $json.amount }}",
+              "type": "string"
+            },
+            {
+              "id": "530ad9b0-db3d-4e71-b1ff-de00bd240a25",
+              "name": "calories",
+              "value": "={{ $json.calories }}",
+              "type": "number"
+            },
+            {
+              "id": "7413ca63-5a01-46b8-8430-54229129dcf1",
+              "name": "carbs_g",
+              "value": "={{ $json.carbs_g }}",
+              "type": "number"
+            },
+            {
+              "id": "63c616e3-5a28-4aab-8369-32653082f006",
+              "name": "protein_g",
+              "value": "={{ $json.protein_g }}",
+              "type": "number"
+            },
+            {
+              "id": "91d74468-93b4-4536-a189-de24bfbd30d7",
+              "name": "fat_g",
+              "value": "={{ $json.fat_g }}",
+              "type": "number"
+            },
+            {
+              "id": "c7c6a36b-3d60-4a16-800b-fb162e890fc0",
+              "name": "sodium_mg",
+              "value": "={{ $json.sodium_mg }}",
+              "type": "number"
+            },
+            {
+              "id": "de63f8c2-c2fd-4e3e-94e6-782eea953f4b",
+              "name": "confidence",
+              "value": "={{ $json.confidence }}",
+              "type": "string"
+            },
+            {
+              "id": "830f0b40-a335-46f3-a86c-781c9b841b47",
+              "name": "meal_type",
+              "value": "={{ $('음식사진 여부 확인').item.json.output.meal_type }}",
+              "type": "string"
+            },
+            {
+              "id": "c3494099-7dc5-4caf-930f-c11328e37b66",
+              "name": "chatid",
+              "value": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+              "type": "number"
+            },
+            {
+              "id": "b4e6761d-0770-408b-9770-1795ee205c78",
+              "name": "message_id",
+              "value": "={{ $('Telegram Trigger').item.json.message.message_id }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1168,
+        -240
+      ],
+      "id": "4858a266-56c1-435b-b9ce-80736321c0c9",
+      "name": "저장할 필드 다듬기"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1RMVPHoZoW5eaCGt0sLvgPKIMyezIhf7MrFB0Mx0mWY4",
+          "mode": "list",
+          "cachedResultName": "식단기록",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1RMVPHoZoW5eaCGt0sLvgPKIMyezIhf7MrFB0Mx0mWY4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "끼니별식단기록",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1RMVPHoZoW5eaCGt0sLvgPKIMyezIhf7MrFB0Mx0mWY4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "date": "={{ $json.date }}",
+            "time": "={{ $json.time }}",
+            "meal type": "={{ $json.meal_type }}",
+            "음식이름": "={{ $json.food_name }}",
+            "음식양": "={{ $json.amount }}",
+            "칼로리": "={{ $json.calories }}",
+            "탄수화물_g": "={{ $json.carbs_g }}",
+            "단백질_g": "={{ $json.protein_g }}",
+            "지방_g": "={{ $json.fat_g }}",
+            "나트륨_mg": "={{ $json.sodium_mg }}",
+            "confidence": "={{ $json.confidence }}",
+            "Chat ID": "={{ $json.chatid }}",
+            "Message ID": "={{ $json.message_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "time",
+              "displayName": "time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "meal type",
+              "displayName": "meal type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "음식이름",
+              "displayName": "음식이름",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "음식양",
+              "displayName": "음식양",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "칼로리",
+              "displayName": "칼로리",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "탄수화물_g",
+              "displayName": "탄수화물_g",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "단백질_g",
+              "displayName": "단백질_g",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "지방_g",
+              "displayName": "지방_g",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "나트륨_mg",
+              "displayName": "나트륨_mg",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "confidence",
+              "displayName": "confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Chat ID",
+              "displayName": "Chat ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Message ID",
+              "displayName": "Message ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1392,
+        -240
+      ],
+      "id": "a05b9792-51f6-4709-be5e-d4655796ffb5",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "DkTF6dziLlUoFaaj",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "concatenate",
+              "field": "음식이름",
+              "separateBy": "\n"
+            },
+            {
+              "aggregation": "sum",
+              "field": "칼로리"
+            },
+            {
+              "aggregation": "sum",
+              "field": "탄수화물_g"
+            },
+            {
+              "aggregation": "sum",
+              "field": "단백질_g"
+            },
+            {
+              "aggregation": "sum",
+              "field": "지방_g"
+            },
+            {
+              "aggregation": "sum",
+              "field": "나트륨_mg"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        1584,
+        -240
+      ],
+      "id": "06b2984e-45a9-47b5-bf9d-d79864d055f0",
+      "name": "Summarize"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=# 사진속 음식이름\n{{ $json['concatenated_음식이름'] }}\n\n## 총계\n- 총칼로리: {{ $json['sum_칼로리'] }}\n- 총탄수화물: {{ $json['sum_탄수화물_g'] }}\n- 총단백질: {{ $json['sum_단백질_g'] }}\n- 총지방: {{ $json['sum_지방_g'] }}\n- 총 나트륨: {{ $json['sum_나트륨_mg'] }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1824,
+        -240
+      ],
+      "id": "e25bbb63-5d10-4674-9e6f-2fe1393c5b66",
+      "name": "Send a text message2",
+      "webhookId": "bf2dc370-7c04-432c-919d-defae37d5021",
+      "credentials": {
+        "telegramApi": {
+          "id": "tVu4mz31dqK4HS7U",
+          "name": "FoodAnalysisBot API Key"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "사진 전송 여부",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "사진 전송 여부": {
+      "main": [
+        [
+          {
+            "node": "음식 분석",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "음식 분석",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "음식 분석",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "음식 분석": {
+      "main": [
+        [
+          {
+            "node": "음식사진 여부 확인",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "음식사진 여부 확인": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "저장할 필드 다듬기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "저장할 필드 다듬기": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize": {
+      "main": [
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c9943d0c-2bc8-4133-9922-b0bde693ff33",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae"
+  },
+  "nodeGroups": [],
+  "id": "MlKf7x9bk85c9RD1",
+  "tags": []
+}
