@@ -1,0 +1,553 @@
+{
+  "name": "04_구매예정 금액 보고 - Fakestore 실습",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        -80
+      ],
+      "id": "b869184e-1f4c-4a9a-9e24-7c0ddded4a81",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://fakestoreapi.com/carts",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -96,
+        -80
+      ],
+      "id": "b16f69af-461b-407b-936e-513d20f1d9aa",
+      "name": "전체 Cart 조회"
+    },
+    {
+      "parameters": {
+        "content": "## Cart 중심에서 Product 중심으로 데이터를 재배치",
+        "height": 256,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        32,
+        -176
+      ],
+      "typeVersion": 1,
+      "id": "fec1ff69-f912-43f7-9765-902e4ff8b08e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "products",
+        "include": "selectedOtherFields",
+        "fieldsToInclude": "id, userId",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1.1,
+      "position": [
+        144,
+        -80
+      ],
+      "id": "b87add4d-c1f3-4f2f-86ed-4ae2b3b995ec",
+      "name": "장바구니의 제품 펼치기"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9a5fac62-32dd-4bf3-ab73-1880f8c96d12",
+              "name": "cartId",
+              "value": "={{ $json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "d10a0926-a9aa-4e38-bd12-f3435b529a62",
+              "name": "userId",
+              "value": "={{ $json.userId }}",
+              "type": "number"
+            },
+            {
+              "id": "35a718b2-0ee0-4d38-b216-0a9e00291135",
+              "name": "productId",
+              "value": "={{ $json.products.productId }}",
+              "type": "number"
+            },
+            {
+              "id": "d41bf3dd-269e-4571-a9aa-41d2ced28f65",
+              "name": "quantity",
+              "value": "={{ $json.products.quantity }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        352,
+        -80
+      ],
+      "id": "00130a58-c7a9-4d05-bbad-a55acdfd3c07",
+      "name": "장바구니 항목 정리"
+    },
+    {
+      "parameters": {
+        "url": "https://fakestoreapi.com/products",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -96,
+        -384
+      ],
+      "id": "ef703867-6068-4516-86ca-35e90d7830d2",
+      "name": "전체 상품 조회"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "id",
+              "field2": "productId"
+            }
+          ]
+        },
+        "joinMode": "enrichInput2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        656,
+        -192
+      ],
+      "id": "c160acde-026a-40e3-8935-0168409410b3",
+      "name": "장바구니와 상품을 합치기"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8c946c45-db3e-4ada-8c9a-d4b9c7dc94f1",
+              "name": "userId",
+              "value": "={{ $json.userId }}",
+              "type": "number"
+            },
+            {
+              "id": "814b6e8f-813c-46fd-abe3-ded98fb1af23",
+              "name": "cartId",
+              "value": "={{ $json.cartId }}",
+              "type": "number"
+            },
+            {
+              "id": "eb50c4ac-aef5-4530-8c3d-64df09ed5eee",
+              "name": "productId",
+              "value": "={{ $json.productId }}",
+              "type": "number"
+            },
+            {
+              "id": "0a0f7d0e-fa91-4716-ac77-07c249db2087",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "b058dfcd-7090-4176-9932-6a5f2fd8de1e",
+              "name": "quantity",
+              "value": "={{ $json.quantity }}",
+              "type": "number"
+            },
+            {
+              "id": "b6201d6f-ee54-4c35-add7-8ddc44ee1087",
+              "name": "price",
+              "value": "={{ $json.price }}",
+              "type": "number"
+            },
+            {
+              "id": "937b195a-35e9-4543-a065-6b737bac5b69",
+              "name": "totalPrice",
+              "value": "={{ $json.price * $json.quantity}}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        832,
+        -192
+      ],
+      "id": "c4b6e80f-1b05-4c43-b2aa-54a9c2b226fe",
+      "name": "총 주문금액 계산 및 필드 정리"
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "sum",
+              "field": "totalPrice"
+            },
+            {
+              "aggregation": "sum",
+              "field": "quantity"
+            },
+            {
+              "aggregation": "countUnique",
+              "field": "cartId"
+            }
+          ]
+        },
+        "fieldsToSplitBy": "userId",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        1008,
+        -192
+      ],
+      "id": "389f6db3-0b8e-4102-84a5-853dba6daa71",
+      "name": "고객별 집계"
+    },
+    {
+      "parameters": {
+        "url": "https://fakestoreapi.com/users",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -96,
+        160
+      ],
+      "id": "53205dfd-caad-4ecb-8cfd-1ce620ce7dda",
+      "name": "전체 고객 조회"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "userId",
+              "field2": "id"
+            }
+          ]
+        },
+        "joinMode": "enrichInput1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1184,
+        0
+      ],
+      "id": "3738b792-0be1-431e-88eb-9b09187f7429",
+      "name": "고객별집계와 전체고객 합치기"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c798b8b4-5669-4521-a9b4-6af5ec42f77e",
+              "name": "customerId",
+              "value": "={{ $json.userId }}",
+              "type": "number"
+            },
+            {
+              "id": "396c2f4d-265d-4619-9c45-6f1873ee0dec",
+              "name": "username",
+              "value": "={{ $json.username }}",
+              "type": "string"
+            },
+            {
+              "id": "b9c009c0-7b38-4234-bddf-dcb05271c86d",
+              "name": "customerEmail",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "f9f76b73-7048-4090-9af9-52d15338183f",
+              "name": "customerName",
+              "value": "={{ $json.name.firstname + \" \" +$json.name.lastname}}",
+              "type": "string"
+            },
+            {
+              "id": "60098edc-f3c2-42ed-8865-8458317a3d9f",
+              "name": "totalPrice",
+              "value": "={{ Math.round($json.sum_totalPrice) }}",
+              "type": "number"
+            },
+            {
+              "id": "28af6fba-a93e-4758-8274-08072d402818",
+              "name": "totalQuantity",
+              "value": "={{ $json.sum_quantity }}",
+              "type": "number"
+            },
+            {
+              "id": "1fe8a4fb-855b-4e9d-8938-8c556e8d29c2",
+              "name": "cartCount",
+              "value": "={{ $json.unique_count_cartId }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1392,
+        0
+      ],
+      "id": "5c0eeddd-dc87-42f6-8cec-f0d497f03444",
+      "name": "합친결과 정리"
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "totalPrice",
+              "order": "descending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        1568,
+        0
+      ],
+      "id": "9fb5785c-8829-4fb4-8964-e759d187f78a",
+      "name": "총금액 기준 정렬"
+    },
+    {
+      "parameters": {
+        "operation": "convertToHtmlTable",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        1776,
+        0
+      ],
+      "id": "e984a563-ac29-49cb-ad2f-420d33d2a126",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "sendTo": "kgmyhsec@gmail.com",
+        "subject": "고객별 구매 예정 금액 보고서",
+        "message": "=<h1>고객별 구매 예정 금액 보고서</h1>\n\n<ul>\n    <li>조회일시 : {{ $now.format('yyyy-MM-dd HH:mm:ss') }}</li>\n</ul>\n\n<h2>집계결과</h2>\n\n{{ $json.table }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2000,
+        0
+      ],
+      "id": "bec934af-bbd7-4add-b002-f74e5c0dd662",
+      "name": "Send a message",
+      "webhookId": "4fa3cdd7-b97b-456a-ae27-0ab3231e6fa2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "aMbnsnCjm6PrLs43",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "전체 Cart 조회",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "전체 상품 조회",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "전체 고객 조회",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "전체 Cart 조회": {
+      "main": [
+        [
+          {
+            "node": "장바구니의 제품 펼치기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "장바구니의 제품 펼치기": {
+      "main": [
+        [
+          {
+            "node": "장바구니 항목 정리",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "전체 상품 조회": {
+      "main": [
+        [
+          {
+            "node": "장바구니와 상품을 합치기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "장바구니 항목 정리": {
+      "main": [
+        [
+          {
+            "node": "장바구니와 상품을 합치기",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "장바구니와 상품을 합치기": {
+      "main": [
+        [
+          {
+            "node": "총 주문금액 계산 및 필드 정리",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "총 주문금액 계산 및 필드 정리": {
+      "main": [
+        [
+          {
+            "node": "고객별 집계",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "고객별 집계": {
+      "main": [
+        [
+          {
+            "node": "고객별집계와 전체고객 합치기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "전체 고객 조회": {
+      "main": [
+        [
+          {
+            "node": "고객별집계와 전체고객 합치기",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "고객별집계와 전체고객 합치기": {
+      "main": [
+        [
+          {
+            "node": "합친결과 정리",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "합친결과 정리": {
+      "main": [
+        [
+          {
+            "node": "총금액 기준 정렬",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "총금액 기준 정렬": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a9b83c80-5102-4533-84e1-90878f668610",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae"
+  },
+  "nodeGroups": [],
+  "id": "kPAby1aEhHWMIwAU",
+  "tags": []
+}
