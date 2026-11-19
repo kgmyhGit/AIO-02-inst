@@ -1,0 +1,166 @@
+{
+  "name": "04_52_SubWorkflow",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "member_id"
+            },
+            {
+              "name": "amount",
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -240,
+        -128
+      ],
+      "id": "5a988da7-11a6-485e-ab37-65a7ae80112c",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "content": "## 서브워크플로우 트리거 \n- Execute Sub workflow\n- main workflow에서 호출을 받아서 실행된다.\n- main workflow에서 받을 값들을 정의한다.\n- **서브워크프로우는 Published 되있었야 호출이 가능**",
+        "width": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -320,
+        -272
+      ],
+      "typeVersion": 1,
+      "id": "f74b0bf2-7e1f-41f4-befa-dbba79725c0d",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "dcaf2634-363b-4b21-be70-0d772f543cb9",
+              "leftValue": "={{ $json.member_id }}",
+              "rightValue": "M-1000",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        0,
+        -128
+      ],
+      "id": "5f909710-ec88-488d-a808-98df0a0d7c44",
+      "name": "회원 조회"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "75d34071-4640-445c-9d7d-e2fa253ee1f8",
+              "name": "result",
+              "value": "={{ $json.member_id }} 회원에 대한 처리가 완료되었습니다. 처리한 양은 {{ $json.amount }} 입니다.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        -224
+      ],
+      "id": "1235913e-977a-4781-82c1-cdeed2603df0",
+      "name": "처리성공"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "28889506-4eea-4891-a482-67b49e4b78e5",
+              "name": "result",
+              "value": "={{ $json.member_id }}는 없는 계정입니다.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        -32
+      ],
+      "id": "bb9f000c-0b86-4115-bfc1-eb503145062d",
+      "name": "처리실패"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "회원 조회",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "회원 조회": {
+      "main": [
+        [
+          {
+            "node": "처리성공",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "처리실패",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "54bbad49-8d7c-4e95-96b1-75bcb843a01e",
+  "meta": {
+    "instanceId": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae"
+  },
+  "nodeGroups": [],
+  "id": "tPt594uKHUX96AZn",
+  "tags": []
+}

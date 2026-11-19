@@ -1,0 +1,248 @@
+{
+  "name": "04_출장 준비 도우미",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -192,
+        -112
+      ],
+      "id": "80a60763-c886-471a-99df-343f494d0d94",
+      "name": "When chat message received",
+      "webhookId": "99aa32f8-4e82-44dd-9b38-eb80f738d093"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=너는 회사 직원의 해외 출장 준비를 돕는 도우미다.\n오늘 날짜는 {{ $now.toFormat('yyyy-MM-dd') }}이고 요일은 {{ $now.setLocale('ko').toFormat('cccc') }}이다.\n\n도구 사용 규칙\n- 날씨를 물으면 먼저 \"city_lookup\"로 좌표를 얻고, 그 좌표로 \"weather_forecast\"를 부른다.\n- 환율을 물으면 \"exchange_rate\"를 부른다.\n- 날씨나 환율과 관계없는 질문에는 도구를 부르지 않는다.\n\n답을 쓰는 규칙\n- 강수 확률, 기온, 환율 같은 숫자는 도구 결과에 있는 값만 쓴다. 기억이나 짐작으로 숫자를 만들지 않는다.\n- 환율은 도구가 돌려준 rate를 \"1 기준 통화 = rate 대상 통화\" 형태로 그대로 알린다. 100엔당 금액 같은 환산 계산을 하지 않는다.\n- \"다음 주 화요일\"처럼 날짜를 가리키는 말을 날짜로 바꾸었으면, 답에 그 날짜를 YYYY-MM-DD로 적어 사용자가 확인할 수 있게 한다.\n- 예보 결과의 날짜 목록에 그 날짜가 없으면 아직 예보가 없다고 답한다.\n- 도구가 오류를 돌려주거나 결과가 비어 있으면 무엇을 찾지 못했는지 그대로 알린다.\n- 한국어로 세 문장 이내로 답한다.",
+          "returnIntermediateSteps": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -16,
+        -112
+      ],
+      "id": "7a7eacc0-fb0c-40c5-a478-309545251f2a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6.2-sol",
+          "mode": "list",
+          "cachedResultName": "gpt-6.2-sol"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -96,
+        64
+      ],
+      "id": "2849326b-ee46-487a-9ab6-3a60610cd4db",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "0aIIz13kma79hikH",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        32,
+        64
+      ],
+      "id": "2c7deffc-adb0-4911-80b8-af1fd2917be6",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "toolDescription": "도시 이름으로 위도, 경도, 나라, 시간대를 찾는다. 날씨 예보를 조회하기 전에 반드시 먼저 쓴다.\n결과의 results 배열에서 첫 번째 원소의 latitude, longitude를 쓴다.\nresults 필드가 없으면 그 이름의 도시를 찾지 못한 것이다.",
+        "url": "https://geocoding-api.open-meteo.com/v1/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ $fromAI('city_name', `위도, 경도를 조회할 도시의 이름\n예: 서울, 런던, 도쿄, Seoul`, 'string') }}"
+            },
+            {
+              "name": "count",
+              "value": "1"
+            },
+            {
+              "name": "language",
+              "value": "ko"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.5,
+      "position": [
+        160,
+        160
+      ],
+      "id": "87a6b163-3288-4283-8f4e-a59aad4b938f",
+      "name": "city_lookup"
+    },
+    {
+      "parameters": {
+        "toolDescription": "위도와 경도로 오늘부터 16일 동안의 일별 예보를 가져온다.\n위도와 경도는 반드시 \"city_lookup\"이 돌려준 값을 넣는다.\n결과의 daily.time은 날짜 목록이고, 같은 순서로 precipitation_probability_max(강수 확률 %),\ntemperature_2m_max(최고 기온 °C), temperature_2m_min(최저 기온 °C)이 들어 있다.",
+        "url": "=https://api.open-meteo.com/v1/forecast",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "latitude",
+              "value": "={{ $fromAI('latitude', 'city_lookup 결과의 latitude', 'number') }}"
+            },
+            {
+              "name": "longitude",
+              "value": "={{ $fromAI('longitude', 'city_lookup 결과의 longitude', 'number') }}"
+            },
+            {
+              "name": "daily",
+              "value": "precipitation_probability_max,temperature_2m_max,temperature_2m_min"
+            },
+            {
+              "name": "timezone",
+              "value": "auto"
+            },
+            {
+              "name": "forecast_days",
+              "value": "16"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.5,
+      "position": [
+        304,
+        160
+      ],
+      "id": "8aa5a381-9a12-4fd0-affc-f1aa7a8eb621",
+      "name": "weather_forecast"
+    },
+    {
+      "parameters": {
+        "toolDescription": "두 통화 사이의 최신 환율을 가져온다. 통화는 ISO 4217 세 글자 코드(KRW, JPY, USD, EUR 등)로 쓴다.\n결과의 rate는 base 통화 1단위가 quote 통화로 얼마 인지를 뜻한다. 금액 환산은 하지 않는다.",
+        "url": "=https://api.frankfurter.dev/v2/rate/{{ $fromAI('base', '기준 통화 코드. 예: JPY', 'string') }}/{{ $fromAI('quote', '대상 통화 코드. 예: KRW', 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.5,
+      "position": [
+        448,
+        160
+      ],
+      "id": "a285dda9-8625-4fab-b273-52e52a042e03",
+      "name": "exchange_rate"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "city_lookup": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "weather_forecast": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "exchange_rate": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8ec6b387-949b-489b-bd7d-2cef97bc0a4c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae"
+  },
+  "nodeGroups": [],
+  "id": "dpdQ2BAePGqDw79n",
+  "tags": []
+}

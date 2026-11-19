@@ -1,0 +1,160 @@
+{
+  "name": "04_52_MainWorkflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        -16
+      ],
+      "id": "b411c245-701f-4e83-b46a-31b7f77322d1",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "content": "## Sub Workflow 호출 (노드로 호출)\n\n- Execute Sub Workflow 노드\n- 서브워크플로우가 아이템 하나씩 처리해야 하는 경우 Loop Over Items(반복처리) 노드를 이용한다.",
+        "height": 400,
+        "width": 528
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -48,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "5fb6b306-cb7a-4c87-9476-00a13abda70c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        32,
+        -16
+      ],
+      "id": "a0c8a64c-c0f1-4be8-8844-10a46f5d9a7e",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "tPt594uKHUX96AZn",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/tPt594uKHUX96AZn",
+          "cachedResultName": "04_52_SubWorkflow"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "member_id": "={{ $json.member_id }}",
+            "amount": "={{ $json.amount }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "member_id",
+              "displayName": "member_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "amount",
+              "displayName": "amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        288,
+        48
+      ],
+      "id": "5acd1ae3-9432-415a-af16-000b3a6bf344",
+      "name": "Call '04_52_SubWorkflow'"
+    }
+  ],
+  "pinData": {
+    "When clicking ‘Execute workflow’": [
+      {
+        "json": {
+          "member_id": "M-1000",
+          "amount": 5000
+        }
+      },
+      {
+        "json": {
+          "member_id": "M-3000",
+          "amount": 2300
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Call '04_52_SubWorkflow'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call '04_52_SubWorkflow'": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "7c5db96e-0cc5-4407-adb2-c01c927d1f07",
+  "meta": {
+    "instanceId": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae"
+  },
+  "nodeGroups": [],
+  "id": "MAlHeUOjiAq8aS7W",
+  "tags": []
+}

@@ -1,0 +1,368 @@
+{
+  "name": "04_일일 식단 리포트",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 23
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -672,
+        -16
+      ],
+      "id": "c39c1151-5240-4b27-be03-78014c137efc",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1RMVPHoZoW5eaCGt0sLvgPKIMyezIhf7MrFB0Mx0mWY4",
+          "mode": "list",
+          "cachedResultName": "식단기록",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1RMVPHoZoW5eaCGt0sLvgPKIMyezIhf7MrFB0Mx0mWY4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "끼니별식단기록",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1RMVPHoZoW5eaCGt0sLvgPKIMyezIhf7MrFB0Mx0mWY4/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "date",
+              "lookupValue": "={{ $now.format(\"yyyy-MM-dd\") }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -304,
+        -16
+      ],
+      "id": "d18d6f6e-492e-489a-8d4e-d2847f0a5970",
+      "name": "오늘 식단기록 조회",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "DkTF6dziLlUoFaaj",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1RMVPHoZoW5eaCGt0sLvgPKIMyezIhf7MrFB0Mx0mWY4",
+          "mode": "list",
+          "cachedResultName": "식단기록",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1RMVPHoZoW5eaCGt0sLvgPKIMyezIhf7MrFB0Mx0mWY4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 814769303,
+          "mode": "list",
+          "cachedResultName": "목표",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1RMVPHoZoW5eaCGt0sLvgPKIMyezIhf7MrFB0Mx0mWY4/edit#gid=814769303"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -496,
+        -16
+      ],
+      "id": "886fe6c2-29d4-406f-a515-f488df6d48a4",
+      "name": "프로필_목표조회",
+      "executeOnce": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "DkTF6dziLlUoFaaj",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4b400ff6-e220-42b0-b7a7-c73af4124eb4",
+              "name": "food_name",
+              "value": "={{ $json[\"음식이름\"] || ''}}",
+              "type": "string"
+            },
+            {
+              "id": "d3808209-6468-45c2-8456-54a138b42c07",
+              "name": "calories",
+              "value": "={{ $json[\"칼로리\"] || 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "27cd84db-c78a-48cd-b21e-0b461aec46d7",
+              "name": "carbs_g",
+              "value": "={{ $json[\"탄수화물_g\"] || 0}}",
+              "type": "number"
+            },
+            {
+              "id": "7a0ed2ec-d804-47c6-b3a3-594207f71265",
+              "name": "protein_g",
+              "value": "={{ $json[\"단백질_g\"] || 0}}",
+              "type": "number"
+            },
+            {
+              "id": "7f88972c-35a3-40e9-b296-982c3345812c",
+              "name": "fat_g",
+              "value": "={{ $json[\"지방_g\"] || 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "61837b99-2e7e-45e3-b412-a194c1f2b67b",
+              "name": "sodium_mg",
+              "value": "={{ $json[\"나트륨_mg\"] || 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "4dc0c3b6-6cb7-417f-9c5e-c78d58f88c3e",
+              "name": "food_line",
+              "value": "=- {{ $json[\"음식이름\"] }}({{ $json[\"음식양\"] }}): {{ $json[\"meal type\"] }} ({{ $json.time }})",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -112,
+        -16
+      ],
+      "id": "525c375b-346c-4c32-a39f-0e4675c7bcc0",
+      "name": "조회값 정리"
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "field": "food_name"
+            },
+            {
+              "aggregation": "sum",
+              "field": "calories"
+            },
+            {
+              "aggregation": "sum",
+              "field": "carbs_g"
+            },
+            {
+              "aggregation": "sum",
+              "field": "protein_g"
+            },
+            {
+              "aggregation": "sum",
+              "field": "fat_g"
+            },
+            {
+              "aggregation": "sum",
+              "field": "sodium_mg"
+            },
+            {
+              "aggregation": "concatenate",
+              "field": "food_line",
+              "separateBy": "\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        -288,
+        192
+      ],
+      "id": "dd2eda67-7e16-4dd4-809e-77a00cbbdd9b",
+      "name": "Summarize"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=- 날짜: {{ $now.format('yyyy-MM-dd') }}\n- 프로필\n    - 키: {{ $('프로필_목표조회').item.json['키_cm'] }}\n    - 몸무게: {{ $('프로필_목표조회').item.json['몸무게_kg'] }}\n\n- 하루목표\n    - 칼로리: {{ $('프로필_목표조회').item.json['목표칼로리_kcal'] }} kcal\n    - 탄수화물: {{ $('프로필_목표조회').item.json['목표탄수화물_g'] }}g\n    - 단백질: {{ $('프로필_목표조회').item.json['목표단백질_g'] }}g\n    - 지방: {{ $('프로필_목표조회').item.json['목표지방_g'] }}g\n    - 나트륨: {{ $('프로필_목표조회').item.json['목표나트륨_mg'] }}mg\n\n- 오늘 먹은 내역\n    - 칼로리: {{ $json.sum_calories }}kcal\n    - 탄수화물: {{ $json.sum_carbs_g }}g\n    - 단백질: {{ $json.sum_protein_g }}g\n    - 지방: {{ $json.sum_fat_g }}g\n    - 나트륨: {{ $json.sum_sodium_mg }}mg\n\n# 오늘 먹은 음식\n{{ $json.concatenated_food_line }}\n\n---\n위 내용을 바탕으로 오늘 식단에 대한 평가와 내일 식단을 위한 조언을 해주세요.\n\n\n\n",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "당신은 식단 관리 영양사 에이전트입니다. 사용자의 하루식단 기록과 개인 프로필 그리고 목표치를 통해 식습관을 평가하고 식단을 조언합니다.\n\n# 작성규칙\n- 한국어로 작성합니다.\n- Gmail로 전송할 메세지에 맞게 응답 내용을 작성합니다.\n- 전체 길이는 600글자 이내로 합니다.\n- 의학적인 진단이나 극단적인 식단 제한은 권하지 않습니다."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -80,
+        192
+      ],
+      "id": "71d736ca-e27b-45a9-a6c0-aa382ac1dd70",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-6-luna"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -160,
+        400
+      ],
+      "id": "4289c524-ea08-4af6-9fe0-ab0d3aeb525a",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "0aIIz13kma79hikH",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "kgmyhsec@gmail.com",
+        "subject": "={{ $now.format('yyyy-MM-dd')}} 식단 분석 리포트",
+        "emailType": "text",
+        "message": "={{ $json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        288,
+        192
+      ],
+      "id": "d6c96d7a-322b-422b-9a51-a30926549300",
+      "name": "Send a message",
+      "webhookId": "d96ba3b2-5561-4895-abfd-71e952e16aa7",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "aMbnsnCjm6PrLs43",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "프로필_목표조회",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "오늘 식단기록 조회": {
+      "main": [
+        [
+          {
+            "node": "조회값 정리",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "프로필_목표조회": {
+      "main": [
+        [
+          {
+            "node": "오늘 식단기록 조회",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "조회값 정리": {
+      "main": [
+        [
+          {
+            "node": "Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f714bb38-45e6-4e66-b6b4-be1f36386469",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae"
+  },
+  "nodeGroups": [],
+  "id": "DFPTeE9JxeGqR4Oj",
+  "tags": []
+}
