@@ -1,0 +1,390 @@
+{
+  "name": "주문 조회",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "order_id",
+              "type": "string"
+            },
+            {
+              "name": "customer_name",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "4cf7e199-5b8e-551c-81bd-2641d9cbc305",
+      "name": "도구 입력",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f0",
+              "name": "order_id",
+              "value": "={{ $ifEmpty($json.order_id, \"\").trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "f1",
+              "name": "customer_name_clean",
+              "value": "={{ $ifEmpty($json.customer_name, \"\").replace(/\\(.*?\\)/g, \"\").trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "92717bf4-45ba-518f-8e9d-7a8b111f048a",
+      "name": "입력 다듬기",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=http://mock-api:8000/orders/{{ $json.order_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "2454e45a-9232-5582-ab6b-df23081cfe12",
+      "name": "주문 API 호출",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "harumarketOrdApi",
+          "name": "하루마켓 주문 API"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "1220a112",
+                    "leftValue": "={{ $json.statusCode }}",
+                    "rightValue": 200,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "찾음"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "5d166119",
+                    "leftValue": "={{ $json.statusCode === 404 && $json.body.error && $json.body.error.code === \"ORDER_NOT_FOUND\" }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "주문 없음"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d7033198",
+                    "leftValue": "={{ $json.statusCode }}",
+                    "rightValue": 401,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "인증 실패"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "8102c95f-a2fb-523a-9488-f6e7b958b3e6",
+      "name": "응답 분류",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        660,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bec3f335",
+              "leftValue": "={{ $json.body.customer_name }}",
+              "rightValue": "={{ $('입력 다듬기').item.json.customer_name_clean }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "06377b18-1a13-589e-ab5c-daf7ceca4ccf",
+      "name": "이름 일치?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        -200
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.stringify({\n  status: \"ok\",\n  answer: {\n    order_id: $json.body.order_id,\n    product_name: $json.body.product_name,\n    option: $json.body.option,\n    order_status: $json.body.order_status,\n    ordered_at: $json.body.ordered_at,\n    shipped_at: $json.body.shipped_at,\n    delivered_at: $json.body.delivered_at,\n    shipping: $json.body.shipping\n  },\n  evidence: {\n    source: \"GET /orders/\" + $('입력 다듬기').item.json.order_id,\n    order_id: $('입력 다듬기').item.json.order_id,\n    http_status: $json.statusCode,\n    as_of: $json.body.as_of,\n    checked_at: $now.toISO()\n  }\n}) }}",
+        "options": {}
+      },
+      "id": "08c01543-93bc-55d6-bc10-aa180c1e7fc1",
+      "name": "결과: 조회 성공",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1100,
+        -280
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.stringify({\n  status: \"name_mismatch\",\n  answer: null,\n  evidence: {\n    source: \"GET /orders/\" + $('입력 다듬기').item.json.order_id,\n    order_id: $('입력 다듬기').item.json.order_id,\n    http_status: $ifEmpty($json.statusCode, null),\n    as_of: null,\n    checked_at: $now.toISO()\n  }\n}) }}",
+        "options": {}
+      },
+      "id": "36b4661d-78e3-559e-a91f-84823201fe99",
+      "name": "결과: 이름 불일치",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1100,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.stringify({\n  status: \"order_not_found\",\n  answer: null,\n  evidence: {\n    source: \"GET /orders/\" + $('입력 다듬기').item.json.order_id,\n    order_id: $('입력 다듬기').item.json.order_id,\n    http_status: $ifEmpty($json.statusCode, null),\n    as_of: null,\n    checked_at: $now.toISO()\n  }\n}) }}",
+        "options": {}
+      },
+      "id": "bc4c9e4d-9c9d-5649-8139-bba0d48d1fcc",
+      "name": "결과: 주문 없음",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1100,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.stringify({\n  status: \"auth_failed\",\n  answer: null,\n  evidence: {\n    source: \"GET /orders/\" + $('입력 다듬기').item.json.order_id,\n    order_id: $('입력 다듬기').item.json.order_id,\n    http_status: $ifEmpty($json.statusCode, null),\n    as_of: null,\n    checked_at: $now.toISO()\n  }\n}) }}",
+        "options": {}
+      },
+      "id": "c553532f-16aa-54d7-a23e-dd9fd5a7f8cb",
+      "name": "결과: 인증 실패",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1100,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.stringify({\n  status: \"lookup_error\",\n  answer: null,\n  evidence: {\n    source: \"GET /orders/\" + $('입력 다듬기').item.json.order_id,\n    order_id: $('입력 다듬기').item.json.order_id,\n    http_status: $ifEmpty($json.statusCode, null),\n    as_of: null,\n    checked_at: $now.toISO()\n  }\n}) }}",
+        "options": {}
+      },
+      "id": "cc811edd-22ea-5931-9f77-c990e6d27623",
+      "name": "결과: 조회 오류",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1100,
+        360
+      ]
+    }
+  ],
+  "connections": {
+    "도구 입력": {
+      "main": [
+        [
+          {
+            "node": "입력 다듬기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "입력 다듬기": {
+      "main": [
+        [
+          {
+            "node": "주문 API 호출",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "주문 API 호출": {
+      "main": [
+        [
+          {
+            "node": "응답 분류",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "결과: 조회 오류",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "응답 분류": {
+      "main": [
+        [
+          {
+            "node": "이름 일치?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "결과: 주문 없음",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "결과: 인증 실패",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "결과: 조회 오류",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "이름 일치?": {
+      "main": [
+        [
+          {
+            "node": "결과: 조회 성공",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "결과: 이름 불일치",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Seoul"
+  },
+  "id": "orderLookup04000",
+  "tags": []
+}

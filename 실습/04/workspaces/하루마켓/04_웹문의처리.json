@@ -1,0 +1,1402 @@
+{
+  "name": "웹 문의 처리",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "harumarket-inquiry",
+        "options": {}
+      },
+      "id": "efd31c58-4ad7-45d3-a41f-17cac7674d7c",
+      "name": "문의 접수",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        880
+      ],
+      "webhookId": "harumarket-inquiry-04"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f0",
+              "name": "name_raw",
+              "value": "={{ $ifEmpty($json.body.name, \"\").trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "f1",
+              "name": "order_no_raw",
+              "value": "={{ $ifEmpty($json.body.order_no, \"\").trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "f2",
+              "name": "content_raw",
+              "value": "={{ $ifEmpty($json.body.content, \"\").trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "627dfec4-753c-43a9-a4ae-725837d17969",
+      "name": "값 다듬기",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c",
+                    "leftValue": "={{ $json.content_raw }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "empty",
+                      "singleValue": true
+                    },
+                    "rightValue": ""
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "본문 없음"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c",
+                    "leftValue": "={{ $json.name_raw }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "empty",
+                      "singleValue": true
+                    },
+                    "rightValue": ""
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "이름 없음"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "정상"
+        }
+      },
+      "id": "5810e2af-54d5-44c9-b925-a13e574b1941",
+      "name": "필수 값 확인",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        448,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f0",
+              "name": "result",
+              "value": "rejected",
+              "type": "string"
+            },
+            {
+              "id": "f1",
+              "name": "reason",
+              "value": "message_empty",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "c6e87da3-fffc-4995-ab2a-3f6f6a30d56a",
+      "name": "접수 실패 기록",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f0",
+              "name": "result",
+              "value": "info_requested",
+              "type": "string"
+            },
+            {
+              "id": "f1",
+              "name": "reason",
+              "value": "customer_name_empty",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "1d55cf10-d44f-41a1-951f-5657f5d6765e",
+      "name": "이름 요청",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f0",
+              "name": "inquiry_id",
+              "value": "={{ null }}",
+              "type": "string"
+            },
+            {
+              "id": "f1",
+              "name": "received_at",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "f2",
+              "name": "channel",
+              "value": "web",
+              "type": "string"
+            },
+            {
+              "id": "f3",
+              "name": "customer_name",
+              "value": "={{ $json.name_raw }}",
+              "type": "string"
+            },
+            {
+              "id": "f4",
+              "name": "order_id",
+              "value": "={{ $ifEmpty($json.order_no_raw, null) }}",
+              "type": "string"
+            },
+            {
+              "id": "f5",
+              "name": "message",
+              "value": "={{ $json.content_raw }}",
+              "type": "string"
+            },
+            {
+              "id": "f6",
+              "name": "request_id",
+              "value": "={{ null }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "059d1c4a-b92f-4a7d-bc5d-b5563d4b4e16",
+      "name": "문의 기록 만들기",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        1008
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c",
+              "leftValue": "={{ $json.order_id }}",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              },
+              "rightValue": "^O-[0-9]{4}$"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "bf19ac60-97ee-48fd-a689-ff81e7158bcc",
+      "name": "주문번호 형식 확인",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        1008
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f0",
+              "name": "result",
+              "value": "info_requested",
+              "type": "string"
+            },
+            {
+              "id": "f1",
+              "name": "reason",
+              "value": "order_id_invalid",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "c8663993-b99d-4560-a1d2-afa59e183294",
+      "name": "주문번호 요청",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1104,
+        1168
+      ]
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.message }}",
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"detected_type\": {\n      \"type\": \"string\",\n      \"enum\": [\n        \"shipping_status\",\n        \"return_change_of_mind\",\n        \"return_defect\",\n        \"exchange_option\",\n        \"exchange_other_product\",\n        \"cancel_full\",\n        \"cancel_partial\",\n        \"mixed\",\n        \"other\"\n      ]\n    },\n    \"dispute_mentioned\": {\n      \"type\": \"boolean\"\n    },\n    \"repeat_mentioned\": {\n      \"type\": \"boolean\"\n    }\n  },\n  \"required\": [\n    \"detected_type\",\n    \"dispute_mentioned\",\n    \"repeat_mentioned\"\n  ]\n}",
+        "options": {
+          "systemPromptTemplate": "너는 온라인 쇼핑몰 하루마켓의 고객 문의를 분류한다.\n문의 문장만 보고 판단한다. 문장에 없는 사실을 짐작하지 않는다.\n\ndetected_type은 아래 값 중 하나다.\n- shipping_status: 배송 일정, 배송 위치, 출고 시점을 묻는다\n- return_change_of_mind: 단순 변심으로 반품이나 환불을 원한다\n- return_defect: 불량, 오배송, 구성품 누락, 상품 정보와 다름을 이유로 반품이나 환불을 원한다\n- exchange_option: 같은 상품의 다른 옵션(사이즈, 색상)으로 바꾸고 싶다\n- exchange_other_product: 다른 상품으로 바꾸고 싶다\n- cancel_full: 주문 전체를 취소하고 싶다\n- cancel_partial: 주문 수량의 일부만 취소하고 싶다\n- mixed: 위의 요청이 두 가지 이상 섞여 있거나, 고객이 둘 중 무엇을 원하는지 정하지 않았다\n- other: 위 어디에도 해당하지 않는다\n\ndispute_mentioned는 소비자원, 신고, 소송처럼 분쟁을 언급하면 true다.\nrepeat_mentioned는 같은 일로 이미 문의했다고 말하면 true다."
+        }
+      },
+      "id": "31b43423-d245-4c1b-8126-61952dc0693a",
+      "name": "요청 분류",
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        1088,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-6-luna"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "112761d2-50db-4de8-95bc-e1cde3af25fb",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1088,
+        1024
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "mImY2pVn0AyqrQhp",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.stringify(Object.assign({}, $('문의 기록 만들기').item.json, {\n  detected_type: $json.output.detected_type,\n  flags: {\n    dispute_mentioned: $json.output.dispute_mentioned,\n    repeat_mentioned: $json.output.repeat_mentioned\n  }\n})) }}",
+        "options": {}
+      },
+      "id": "eda0fed1-e5ee-4628-9237-3dc47d7bf97d",
+      "name": "분류 결과 붙이기",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1328,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1e18d551",
+              "leftValue": "={{ [\"shipping_status\",\"return_change_of_mind\",\"return_defect\",\"exchange_option\",\"exchange_other_product\",\"cancel_full\",\"cancel_partial\",\"mixed\",\"other\"].includes($json.detected_type) && typeof $json.flags.dispute_mentioned === \"boolean\" && typeof $json.flags.repeat_mentioned === \"boolean\" }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "eecc93b6-7400-4a61-85e0-45546a083e24",
+      "name": "분류 값 확인",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1552,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f0",
+              "name": "result",
+              "value": "handed_over",
+              "type": "string"
+            },
+            {
+              "id": "f1",
+              "name": "reason",
+              "value": "classification_invalid",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "a7bc8333-aad4-4626-b7fa-0e083cc39787",
+      "name": "사람에게: 분류 실패",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1760,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "52a0d4cf",
+                    "leftValue": "={{ $json.flags.dispute_mentioned || $json.flags.repeat_mentioned }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "표시 있음"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "20ff035e",
+                    "leftValue": "={{ $json.detected_type }}",
+                    "rightValue": "shipping_status",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "shipping"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "27b96ad0",
+                    "leftValue": "={{ $json.detected_type }}",
+                    "rightValue": "return_",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "return"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d70ffc13",
+                    "leftValue": "={{ $json.detected_type }}",
+                    "rightValue": "exchange_",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "exchange"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ecdf89bb",
+                    "leftValue": "={{ $json.detected_type }}",
+                    "rightValue": "cancel_",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "cancel"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "714883b1-0ea7-4467-863d-152fdf3e05be",
+      "name": "요청 유형 경로",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1760,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f0",
+              "name": "result",
+              "value": "handed_over",
+              "type": "string"
+            },
+            {
+              "id": "f1",
+              "name": "reason",
+              "value": "flagged",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "f4623c73-db3d-47fb-b9c2-4f28492a2fe2",
+      "name": "사람에게: 표시 있음",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2032,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f0",
+              "name": "result",
+              "value": "handed_over",
+              "type": "string"
+            },
+            {
+              "id": "f1",
+              "name": "reason",
+              "value": "mixed_or_other",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "5a7317a8-cc0b-4a61-b063-eb6dbfb5b465",
+      "name": "사람에게: 유형 확인 필요",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2032,
+        1344
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "c9115fce-da09-497b-838a-ede7d71b9fa5",
+      "name": "반품 경로",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2032,
+        1088
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "6e3c78fa-e54e-49a3-a5b7-8c388ccc999f",
+      "name": "교환 경로",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2032,
+        1200
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "72e19d2b-7171-49e6-842e-3caac71bbff1",
+      "name": "취소 경로",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2032,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f0",
+              "name": "order_ids",
+              "value": "={{ ($json.message.toUpperCase().match(/O-[0-9]{4}/g) || []).concat([$json.order_id]).removeDuplicates() }}",
+              "type": "array"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "d33da1e1-5706-4072-b27f-a0fa006ebbf2",
+      "name": "주문번호 모으기",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2032,
+        688
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9434da7e",
+              "leftValue": "={{ $json.order_ids.length }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "42c6a9eb-d435-4eab-b11c-67dc55fce4bd",
+      "name": "주문이 하나인가",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2240,
+        688
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "orderLookup04000",
+          "cachedResultName": "주문 조회"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "order_id": "={{ $json.order_id }}",
+            "customer_name": "={{ $json.customer_name }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "8aaa0102-ed9b-41b4-85f0-a1fcf79940f9",
+      "name": "주문 조회 실행",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2688,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d134a684",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "ok",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e57ece4c-5ed2-44a1-8e2b-72cf1bbcb342",
+      "name": "조회 성공?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2912,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "528ad0e4",
+                    "leftValue": "={{ $json.answer.order_status === \"shipped\" && $json.answer.shipping.delay_check_required === true }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "지연"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c98b3200",
+                    "leftValue": "={{ $json.answer.order_status }}",
+                    "rightValue": "shipped",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "배송 중"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d725f717",
+                    "leftValue": "={{ [\"paid\",\"preparing\"].includes($json.answer.order_status) && $json.answer.shipping.ship_overdue === true }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "출고 지연"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8659cd78",
+                    "leftValue": "={{ [\"paid\",\"preparing\"].includes($json.answer.order_status) }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "출고 전"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "edd94157",
+                    "leftValue": "={{ $json.answer.order_status }}",
+                    "rightValue": "delivered",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "배송 완료"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "7c17eeac-b85e-469b-9780-1cb109ee0bb2",
+      "name": "배송 상태",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        3120,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.stringify({\n  status: \"handoff\",\n  answer: null,\n  evidence: [{ order_id: $json.evidence.order_id, tool_status: $json.status }]\n}) }}",
+        "options": {}
+      },
+      "id": "44d78317-7910-478d-8c1e-777e7b5f0aea",
+      "name": "기본 안내: 조회 실패",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3344,
+        688
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.stringify({\n  status: \"handoff\",\n  answer: \"주문하신 \" + $json.answer.product_name + \" 주문(\" + $json.answer.order_id + \")은 \" + $json.answer.shipped_at + \"에 출고되었지만 배송이 늦어지고 있어, 담당자가 택배사에 확인한 뒤 다시 안내드리겠습니다.\",\n  evidence: [{\n    order_id: $json.answer.order_id,\n    tool_status: \"ok\",\n    order_status: $json.answer.order_status,\n    expected_from: $json.answer.shipping.expected_delivery_from,\n    expected_to: $json.answer.shipping.expected_delivery_to,\n    delay_check_required: true\n  }]\n}) }}",
+        "options": {}
+      },
+      "id": "28beec37-b314-4182-9683-cbf12eaa092a",
+      "name": "기본 안내: 지연",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3344,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.stringify({\n  status: \"answered\",\n  answer: \"주문하신 \" + $json.answer.product_name + \" 주문(\" + $json.answer.order_id + \")은 \" + $json.answer.shipped_at + \"에 출고되어 배송 중이며, \" + $json.answer.shipping.expected_delivery_from + \"부터 \" + $json.answer.shipping.expected_delivery_to + \" 사이에 도착할 예정입니다.\",\n  evidence: [{\n    order_id: $json.answer.order_id,\n    tool_status: \"ok\",\n    order_status: $json.answer.order_status,\n    expected_from: $json.answer.shipping.expected_delivery_from,\n    expected_to: $json.answer.shipping.expected_delivery_to,\n    delay_check_required: false\n  }]\n}) }}",
+        "options": {}
+      },
+      "id": "78fd6504-8aa0-4e90-b339-196277346973",
+      "name": "기본 안내: 배송 중",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3344,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.stringify({\n  status: \"handoff\",\n  answer: null,\n  evidence: [{\n    order_id: $json.answer.order_id,\n    tool_status: \"ok\",\n    order_status: $json.answer.order_status,\n    expected_from: $json.answer.shipping.expected_ship_from,\n    expected_to: $json.answer.shipping.expected_ship_to,\n    delay_check_required: null\n  }]\n}) }}",
+        "options": {}
+      },
+      "id": "3f05b735-aa0a-4ee0-bb2e-5147efded224",
+      "name": "기본 안내: 출고 지연",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3344,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.stringify({\n  status: \"answered\",\n  answer: \"주문하신 \" + $json.answer.product_name + \" 주문(\" + $json.answer.order_id + \")은 \" + $json.answer.shipping.expected_ship_from + \"부터 \" + $json.answer.shipping.expected_ship_to + \" 사이에 출고될 예정입니다.\",\n  evidence: [{\n    order_id: $json.answer.order_id,\n    tool_status: \"ok\",\n    order_status: $json.answer.order_status,\n    expected_from: $json.answer.shipping.expected_ship_from,\n    expected_to: $json.answer.shipping.expected_ship_to,\n    delay_check_required: null\n  }]\n}) }}",
+        "options": {}
+      },
+      "id": "019a82a5-0d6c-4318-96af-d478f884aca2",
+      "name": "기본 안내: 출고 전",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3344,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.stringify({\n  status: \"answered\",\n  answer: \"주문하신 \" + $json.answer.product_name + \" 주문(\" + $json.answer.order_id + \")은 \" + $json.answer.delivered_at + \"에 배송이 완료되었습니다.\",\n  evidence: [{\n    order_id: $json.answer.order_id,\n    tool_status: \"ok\",\n    order_status: $json.answer.order_status,\n    expected_from: null,\n    expected_to: null,\n    delay_check_required: null\n  }]\n}) }}",
+        "options": {}
+      },
+      "id": "fc86d448-5f9b-4296-9a9b-8d3bd023c19b",
+      "name": "기본 안내: 배송 완료",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3344,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "shipAgent0400000",
+          "cachedResultName": "배송 안내 에이전트"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "customer_name": "={{ $json.customer_name }}",
+            "order_id": "={{ $json.order_id }}",
+            "message": "={{ $json.message }}",
+            "order_ids": "={{ $json.order_ids }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "order_ids",
+              "displayName": "order_ids",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "de6d886c-85f1-4c93-be0a-b345d25012ce",
+      "name": "배송 안내 에이전트 실행",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2688,
+        928
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "문의 접수": {
+      "main": [
+        [
+          {
+            "node": "값 다듬기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "값 다듬기": {
+      "main": [
+        [
+          {
+            "node": "필수 값 확인",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "필수 값 확인": {
+      "main": [
+        [
+          {
+            "node": "접수 실패 기록",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "이름 요청",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "문의 기록 만들기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "문의 기록 만들기": {
+      "main": [
+        [
+          {
+            "node": "주문번호 형식 확인",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "주문번호 형식 확인": {
+      "main": [
+        [
+          {
+            "node": "요청 분류",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "주문번호 요청",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "요청 분류": {
+      "main": [
+        [
+          {
+            "node": "분류 결과 붙이기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "분류 결과 붙이기": {
+      "main": [
+        [
+          {
+            "node": "분류 값 확인",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "분류 값 확인": {
+      "main": [
+        [
+          {
+            "node": "요청 유형 경로",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "사람에게: 분류 실패",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "요청 유형 경로": {
+      "main": [
+        [
+          {
+            "node": "사람에게: 표시 있음",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "주문번호 모으기",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "반품 경로",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "교환 경로",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "취소 경로",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "사람에게: 유형 확인 필요",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "주문번호 모으기": {
+      "main": [
+        [
+          {
+            "node": "주문이 하나인가",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "배송 상태": {
+      "main": [
+        [
+          {
+            "node": "기본 안내: 지연",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "기본 안내: 배송 중",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "기본 안내: 출고 지연",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "기본 안내: 출고 전",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "기본 안내: 배송 완료",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "기본 안내: 조회 실패",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "주문이 하나인가": {
+      "main": [
+        [
+          {
+            "node": "주문 조회 실행",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "배송 안내 에이전트 실행",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "주문 조회 실행": {
+      "main": [
+        [
+          {
+            "node": "조회 성공?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "조회 성공?": {
+      "main": [
+        [
+          {
+            "node": "배송 상태",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "기본 안내: 조회 실패",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "요청 분류",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ecf2ed58-7f4d-4c66-8289-e613ed76bea3",
+  "meta": {
+    "instanceId": "10a5c67d3b7c97270ceae20c841dc3e0a60f6027bf994653ce958e1fb31213fd"
+  },
+  "nodeGroups": [],
+  "id": "4DE8cLBWOdSSkaEI",
+  "tags": []
+}
