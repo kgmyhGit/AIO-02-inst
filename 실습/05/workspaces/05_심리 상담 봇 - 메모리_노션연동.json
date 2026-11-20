@@ -1,0 +1,392 @@
+{
+  "name": "05_심리 상담 봇 - 메모리_노션연동",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "responseMode": "responseNodes"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -128,
+        0
+      ],
+      "id": "4fcdbe6c-21a2-4f8e-9336-848b437d1cf8",
+      "name": "When chat message received",
+      "webhookId": "f5010b40-2647-43ac-8dc0-4ebb3eabcc92"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "너는 심리 상담 챗봇이다.\n상담자의 심리 상태를 살피고, 공감하는 말로 먼저 답한 뒤 도움이 될 만한 생각이나 작은 행동을 제안한다.\n상담자가 앞에서 한 말이 있으면 앞의 대화를 보고 이어서 답한다. 앞의 대화에 없는 내용은 들은 것처럼 말하지 않는다.\n의학적 진단을 내리거나 약을 권하지 않는다.\n친근하고 친절한 존댓말로 세 문장 안팎으로 답한다.\n상담자가 자해나 자살에 대한 생각, 당장의 위험을 말하면 혼자 견디지 않도록 권하고, 자살예방 상담전화 109나 정신건강 위기상담전화 1577-0199, 긴급한 경우 119로 바로 연락하도록 안내한다."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        128,
+        0
+      ],
+      "id": "4f9dda8a-84cf-481f-9123-f1cc1fc41fca",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-6-luna"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        64,
+        224
+      ],
+      "id": "5b0211c7-2e5f-4e3f-bb42-96f86bfc8d42",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "0aIIz13kma79hikH",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableName": "chat_histories",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.4,
+      "position": [
+        288,
+        224
+      ],
+      "id": "9da984a2-9761-4742-a34c-a3dd379f39c2",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "T6S8CzKEHQ9N6fGD",
+          "name": "n8n_exam DB Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "41eb0cd6-68a1-80ef-9b52-000bb2316003",
+          "mode": "list",
+          "cachedResultName": "심리 상담 일지",
+          "cachedResultUrl": "https://app.notion.com/p/41eb0cd668a18059a7fdc8dc12f8c1c4"
+        },
+        "filterType": "manual",
+        "filters": {
+          "conditions": [
+            {
+              "key": "session_id|rich_text",
+              "condition": "equals",
+              "richTextValue": "={{ $('When chat message received').item.json.sessionId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        480,
+        0
+      ],
+      "id": "d0b89bd2-8b6c-4712-92d1-cffbfc9ddbdc",
+      "name": "DB의 상담 내역들 조회",
+      "alwaysOutputData": true,
+      "credentials": {
+        "notionApi": {
+          "id": "RFYM1UhEiQJrTWNN",
+          "name": "심리상담일지 - API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "77c6da19-83f4-4ee1-b951-b8a8be995ed8",
+              "leftValue": "={{ $json.url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        736,
+        0
+      ],
+      "id": "0ac4be7d-1285-4f17-bdd8-aac628bfcf6c",
+      "name": "If - 현재 대화 저장 여부 확인"
+    },
+    {
+      "parameters": {
+        "resource": "block",
+        "blockId": {
+          "__rl": true,
+          "value": "={{ $json.url }}",
+          "mode": "url"
+        },
+        "blockUi": {
+          "blockValues": [
+            {
+              "type": "heading_1",
+              "textContent": "=상담자 질문"
+            },
+            {
+              "textContent": "={{ $('When chat message received').item.json.chatInput }}"
+            },
+            {
+              "type": "heading_1",
+              "textContent": "답변"
+            },
+            {
+              "textContent": "={{ $('AI Agent').item.json.output }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        1024,
+        -80
+      ],
+      "id": "845d541a-c927-4d6d-a251-6c863e5b8537",
+      "name": "기존 대화에 상담 내역 추가",
+      "credentials": {
+        "notionApi": {
+          "id": "RFYM1UhEiQJrTWNN",
+          "name": "심리상담일지 - API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "dataSourceId": {
+          "__rl": true,
+          "value": "41eb0cd6-68a1-80ef-9b52-000bb2316003",
+          "mode": "list",
+          "cachedResultName": "심리 상담 일지",
+          "cachedResultUrl": "https://app.notion.com/p/41eb0cd668a18059a7fdc8dc12f8c1c4"
+        },
+        "title": "=${{ $now }} - 상담",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "session_id|rich_text",
+              "textContent": "={{ $('When chat message received').item.json.sessionId }}"
+            }
+          ]
+        },
+        "blockUi": {
+          "blockValues": [
+            {
+              "type": "heading_1",
+              "textContent": "상담자 문의"
+            },
+            {
+              "textContent": "={{ $('When chat message received').item.json.chatInput }}"
+            },
+            {
+              "type": "heading_1",
+              "textContent": "답변"
+            },
+            {
+              "textContent": "={{ $('AI Agent').item.json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 3,
+      "position": [
+        1024,
+        128
+      ],
+      "id": "2dd52353-5179-420e-ba81-800ac086c693",
+      "name": "새로운 상담일지 생성",
+      "credentials": {
+        "notionApi": {
+          "id": "RFYM1UhEiQJrTWNN",
+          "name": "심리상담일지 - API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "message": "={{ $('AI Agent').item.json.output }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1.3,
+      "position": [
+        1264,
+        16
+      ],
+      "id": "46705ed8-0bcf-4c87-a6fa-709b6ab174b7",
+      "name": "Chat",
+      "webhookId": "eb6ff723-cf48-4469-bcb3-8f5763eec6ce"
+    },
+    {
+      "parameters": {
+        "content": "## 노드\nDB의 상담 내역들 조회 - Notion > Database Page > Get all database pages\n\n기존 대화에 상담 내역 추가 : Notion > Block Action > append Block\n\n새로운 상담일지 생성: Notion > Database page action > create database page\n\nIf -> Settings 탭 > Always Output Data",
+        "height": 288,
+        "width": 304
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        80,
+        -224
+      ],
+      "typeVersion": 1,
+      "id": "9cc6d7bf-2992-4561-891f-e2b561552a1d",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "DB의 상담 내역들 조회",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DB의 상담 내역들 조회": {
+      "main": [
+        [
+          {
+            "node": "If - 현재 대화 저장 여부 확인",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If - 현재 대화 저장 여부 확인": {
+      "main": [
+        [
+          {
+            "node": "기존 대화에 상담 내역 추가",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "새로운 상담일지 생성",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "기존 대화에 상담 내역 추가": {
+      "main": [
+        [
+          {
+            "node": "Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "새로운 상담일지 생성": {
+      "main": [
+        [
+          {
+            "node": "Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "288ac4dc-928d-4dc7-91a5-45a3617c1d33",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae"
+  },
+  "nodeGroups": [],
+  "id": "NdcsiAvOBQ9md8pJ",
+  "tags": []
+}
