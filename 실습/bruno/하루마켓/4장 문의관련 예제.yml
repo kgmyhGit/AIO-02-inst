@@ -1,0 +1,27 @@
+info:
+  name: 4장 문의관련 예제
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: https://glisten-italicize-designate.ngrok-free.dev/webhook-test/harumarket-inquiry
+  headers:
+    - name: X-API-Key
+      value: alskdjflka9087sdaflkjjxcvkl23=
+  body:
+    type: json
+    data: |-
+      {
+              "name": "배현우",
+              "order_no": "O-2005",
+              "content": "스피커를 실수로 두 번 주문했어요. O-2005랑 O-2006 둘 다 언제 출고되나요?",
+              "agree_privacy": true
+            }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
