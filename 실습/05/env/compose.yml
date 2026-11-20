@@ -1,0 +1,93 @@
+# 5장 실습용 n8n 실행 구성
+#
+# 4장 구성(db, n8n, mock-api)에서 두 곳을 바꾸었다.
+#   db  : PostgreSQL 17에 pgvector 확장을 더한 이미지로 바꾼다. 데이터 볼륨(db_data)은 그대로 쓴다
+#   n8n : 정책 문서 폴더(policies)를 읽기 전용으로 연결하고, 파일 노드가 읽을 수 있는 경로를 정한다
+#   mock-api : 4장과 같다
+#
+# 사용 방법은 5장 실습 문서의 '실습 5-4' 2단계를 따른다.
+# 4장에서 쓰던 폴더의 compose.yml을 이 파일로 바꾸고, 같은 폴더에 policies 폴더를 복사한다.
+# .env 파일은 4장 것을 그대로 쓴다. 새로 더할 값은 없다.
+
+name: n8n-textbook
+
+services:
+  db:
+    # 3장의 postgres:17에 pgvector 확장을 더한 이미지다.
+    # 태그 끝의 trixie는 기반 운영체제(Debian 13)다. 지금 쓰는 db 컨테이너의 기반 운영체제와 같은 것을 고른다.
+    # 확인 방법과 bookworm(Debian 12)일 때의 태그는 실습 5-4 2단계에 있다.
+    image: pgvector/pgvector:0.8.6-pg17-trixie
+    restart: unless-stopped
+    ports:
+      # 왼쪽이 내 컴퓨터의 포트, 오른쪽이 컨테이너 안의 포트다(3장과 같다).
+      # 5432가 이미 쓰이고 있으면 왼쪽 숫자만 바꾼다(예: "15432:5432").
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: n8n
+      TZ: ${TIMEZONE}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./업무DB_초기화.sql:/docker-entrypoint-initdb.d/10-harumarket.sql:ro
+      # 예제용 데이터베이스 n8n_exam을 만든다. 위 스크립트 다음에 실행된다.
+      - ./예제DB_초기화.sql:/docker-entrypoint-initdb.d/20-n8n-exam.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d n8n"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  n8n:
+    image: n8nio/n8n:2.43.7
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      mock-api:
+        condition: service_started
+    ports:
+      - "5678:5678"
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: db
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_USER: ${POSTGRES_USER}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+      GENERIC_TIMEZONE: ${TIMEZONE}
+      TZ: ${TIMEZONE}
+      N8N_RUNNERS_ENABLED: "true"
+      # 외부 서비스가 n8n을 호출할 공개 주소. Webhook 노드의 주소를 이 값으로 만든다.
+      N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL}
+      # n8n 앞에서 요청을 전달하는 프록시의 수. ngrok 하나이므로 1이다.
+      N8N_PROXY_HOPS: 1
+      # 편집 화면 주소. OAuth 콜백 주소와 실행 기록 링크도 이 값으로 만든다. 포트를 바꾸면 이 번호도 바꾼다.
+      N8N_EDITOR_BASE_URL: http://localhost:5678
+      # 파일을 읽고 쓰는 노드가 접근할 수 있는 경로. 2.0부터 이 경로 밖의 파일은 읽을 수 없다.
+      # 여기서는 정책 문서를 연결한 /files 아래만 허용한다.
+      N8N_RESTRICT_FILE_ACCESS_TO: /files
+    volumes:
+      - n8n_data:/home/node/.n8n
+      # 정책 문서 폴더. n8n 안에서는 /files/policies 로 보인다. 읽기 전용이다.
+      - ./policies:/files/policies:ro
+
+  mock-api:
+    # 4장과 같다.
+    image: python:3.13-slim
+    restart: unless-stopped
+    working_dir: /app
+    command: ["python", "server.py"]
+    environment:
+      MOCK_API_KEY: ${MOCK_API_KEY}
+      MOCK_TODAY: "2026-09-10"
+      PYTHONUNBUFFERED: "1"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./mock-api:/app:ro
+
+volumes:
+  n8n_data:
+  db_data:

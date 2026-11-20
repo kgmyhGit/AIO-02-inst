@@ -1,0 +1,12 @@
+{
+  "description": "5장 실습 5-5의 검색 확인에 쓰는 질문 6개. Q-1~Q-4는 반품·배송 정책 문서에 답이 있고, Q-5와 Q-6은 어느 문서에도 답이 없다. 답이 없는 질문도 검색 결과가 나오는지와 점수가 어떻게 다른지 비교한다.",
+  "group": "shipping_return",
+  "questions": [
+    { "id": "Q-1", "question": "단순 변심으로 반품하면 배송비는 누가 내요?", "expected_doc": "RET-01", "has_answer": true },
+    { "id": "Q-2", "question": "받은 상품이 깨져 있으면 언제까지 반품할 수 있나요?", "expected_doc": "RET-02", "has_answer": true },
+    { "id": "Q-3", "question": "결제하고 나서 며칠 만에 상품을 보내 주세요?", "expected_doc": "SHP-01", "has_answer": true },
+    { "id": "Q-4", "question": "출고됐다는 문자를 받은 지 일주일이 넘었는데 아직 안 와요", "expected_doc": "SHP-02", "has_answer": true },
+    { "id": "Q-5", "question": "해외 주소로도 배송해 주시나요?", "expected_doc": null, "has_answer": false },
+    { "id": "Q-6", "question": "적립금은 언제 소멸되나요?", "expected_doc": null, "has_answer": false }
+  ]
+}

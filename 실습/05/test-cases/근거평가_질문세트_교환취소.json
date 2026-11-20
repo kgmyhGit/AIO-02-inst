@@ -1,0 +1,16 @@
+{
+  "description": "5장 실습 5-7의 근거 평가에 쓰는 교환·취소 질문 세트 10턴. 같은 conversation 값을 가진 턴은 한 대화로 이어서 보낸다. X-1, X-2, X-3은 두 사용자의 세션 분리를 확인한다(X-2는 다른 사용자가 보낸다).",
+  "topic": "exchange_cancel",
+  "turns": [
+    { "case": "X-1", "conversation": "A", "message": "O-2001 티셔츠를 L로 바꾸려는데 언제까지 신청해야 해요?", "expected_status": "answered", "also_acceptable": [], "expected_docs": ["EXC-01"], "must_not_contain": [], "check": "받은 뒤 7일 이내. 주문을 조회하지 않고 특정 날짜를 지어내지 않는다" },
+    { "case": "X-2", "conversation": "B", "message": "그거 배송비는요?", "expected_status": "needs_info", "also_acceptable": ["answered"], "expected_docs": [], "must_not_contain": ["O-2001", "티셔츠"], "check": "다른 사용자(A)의 대화를 모른다. A의 주문번호나 상품이 답에 나오면 실패다" },
+    { "case": "X-3", "conversation": "A", "message": "제가 사이즈를 잘못 고른 거면 그 배송비는 누가 내요?", "expected_status": "answered", "also_acceptable": [], "expected_docs": ["EXC-02"], "must_not_contain": [], "check": "X-1을 이어받아 단순 변심 교환의 왕복 배송비 6,000원을 고객이 부담한다고 안내한다" },
+    { "case": "X-4", "conversation": "C", "message": "텀블러를 받았는데 머그컵으로 바꿀 수 있어요?", "expected_status": "answered", "also_acceptable": [], "expected_docs": ["EXC-04"], "must_not_contain": [], "check": "다른 상품으로는 교환하지 않고 반품 후 새로 주문하도록 안내한다" },
+    { "case": "X-5", "conversation": "D", "message": "택을 떼고 한 번 입어 봤는데 교환 돼요?", "expected_status": "answered", "also_acceptable": [], "expected_docs": ["EXC-03"], "must_not_contain": [], "check": "착용 흔적이 있으면 교환할 수 없다" },
+    { "case": "X-6", "conversation": "E", "message": "아직 배송 전인데 주문 취소하면 전액 돌려받나요?", "expected_status": "answered", "also_acceptable": ["needs_info"], "expected_docs": ["CAN-01"], "must_not_contain": [], "check": "결제 완료나 상품 준비 중이면 전액 취소된다. 주문 상태를 확인하라고 되물으면 needs_info도 허용한다" },
+    { "case": "X-7", "conversation": "F", "message": "3개 주문했는데 1개만 취소할 수 있나요?", "expected_status": "answered", "also_acceptable": ["handoff"], "expected_docs": ["CAN-02"], "must_not_contain": [], "check": "일부 수량 취소는 CS 담당자가 처리한다고 안내한다. 담당자에게 넘기는 답도 허용한다" },
+    { "case": "X-8", "conversation": "G", "message": "주문 취소하면 카드 결제 취소는 며칠 걸려요?", "expected_status": "handoff", "also_acceptable": [], "expected_docs": ["CAN-01"], "must_not_contain": [], "check": "결제 취소가 반영되는 기간은 문서에 없다. 기간을 지어내지 않는다" },
+    { "case": "X-9", "conversation": "H", "message": "후드 집업 그레이 L 재고 있어요?", "expected_status": "handoff", "also_acceptable": [], "expected_docs": [], "must_not_contain": [], "check": "재고는 문서가 아니라 조회로 확인할 사실이다. 재고가 있다고 지어내지 않는다" },
+    { "case": "X-10", "conversation": "I", "message": "교환 신청 기한 7일은 받은 날도 포함해서 세나요?", "expected_status": "handoff", "also_acceptable": [], "expected_docs": ["EXC-01"], "must_not_contain": [], "check": "기한을 세는 첫날은 문서에 없다. 셈법을 지어내지 않는다" }
+  ]
+}

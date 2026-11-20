@@ -1,0 +1,72 @@
+{
+  "description": "5장 실습 5-4에서 웹 문의 처리로 보내는 요청 본문 6건. 이 순서대로 한 건씩 보낸다. R-1~R-4는 새로 만든 사례이고 W-6은 3장, D-1은 4장 사례를 다시 쓴다. 가상 데이터다.",
+  "reference_date": "2026-09-10",
+  "requests": [
+    {
+      "case": "R-1",
+      "purpose": "단순 변심 반품. 같은 주문의 열린 요청이 없으므로 요청 기록을 새로 만든다(T01). 1장 INQ-004와 같은 문장이다",
+      "expected": { "detected_type": "return_change_of_mind", "request": "새로 만든다", "request_status": "received" },
+      "body": {
+        "name": "최민지",
+        "order_no": "O-1004",
+        "content": "셔츠 사이즈가 생각보다 커서 반품하고 싶어요. 입어 보지는 않았고 택도 그대로 있어요.",
+        "agree_privacy": true
+      }
+    },
+    {
+      "case": "R-2",
+      "purpose": "같은 주문의 재문의. R-1이 만든 요청에 연결하고 상태는 바꾸지 않는다(T02). 2장 INQ-016과 같은 문장이다",
+      "expected": { "detected_type": "결과를 기록한다", "request": "R-1의 요청에 연결한다", "request_status": "바뀌지 않는다" },
+      "body": {
+        "name": "최민지",
+        "order_no": "O-1004",
+        "content": "지난주에 셔츠 반품을 신청했는데 아직 회수하러 오지 않았어요. 언제 오나요?",
+        "agree_privacy": true
+      }
+    },
+    {
+      "case": "R-3",
+      "purpose": "같은 주문의 두 번째 재문의. 요청에 연결하고 담당자에게 넘긴다(T03)",
+      "expected": { "detected_type": "결과를 기록한다", "request": "R-1의 요청에 연결한다", "request_status": "under_review", "handover_reason": "repeat_inquiry" },
+      "body": {
+        "name": "최민지",
+        "order_no": "O-1004",
+        "content": "벌써 세 번째 문의드립니다. 셔츠 반품 회수 일정을 아직 못 받았어요. 언제 오는지 알려 주세요.",
+        "agree_privacy": true
+      }
+    },
+    {
+      "case": "R-4",
+      "purpose": "불량 반품. 다른 주문이므로 요청 기록을 새로 만든다(T01). 1장 INQ-005와 같은 문장이다",
+      "expected": { "detected_type": "return_defect", "request": "새로 만든다", "request_status": "received" },
+      "body": {
+        "name": "정하늘",
+        "order_no": "O-1005",
+        "content": "머그컵 세트를 받았는데 한 개에 금이 가 있어요. 환불받고 싶습니다.",
+        "agree_privacy": true
+      }
+    },
+    {
+      "case": "W-6",
+      "purpose": "교환과 환불이 한 문장에 섞였다. 요청 기록을 만들고 곧바로 담당자에게 넘긴다(T01 → T08). 3장 W-6과 같다",
+      "expected": { "detected_type": "mixed", "request": "새로 만든다", "request_status": "under_review", "handover_reason": "mixed_or_other" },
+      "body": {
+        "name": " 고다인 ",
+        "order_no": " O-2011 ",
+        "content": "슬리퍼가 발에 안 맞는데 한 치수 큰 걸로 바꾸거나 그냥 환불받고 싶어요.",
+        "agree_privacy": true
+      }
+    },
+    {
+      "case": "D-1",
+      "purpose": "배송 문의. 요청 기록을 만들지 않고 문의 기록만 남긴다. 4장 D-1과 같다",
+      "expected": { "detected_type": "shipping_status", "request": "만들지 않는다" },
+      "body": {
+        "name": "이준호",
+        "order_no": "O-1002",
+        "content": "요가 매트 주문했는데 언제쯤 도착할까요?",
+        "agree_privacy": true
+      }
+    }
+  ]
+}
