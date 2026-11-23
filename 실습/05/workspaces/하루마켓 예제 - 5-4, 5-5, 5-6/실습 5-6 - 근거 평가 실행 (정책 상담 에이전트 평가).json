@@ -1,0 +1,338 @@
+{
+  "name": "실습 5- 6 - 근거 평가 실행 (정책 상담 에이전트 평가)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "07adca8b-8961-479d-8eac-70ab9193787c",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"description\": \"5장 실습 5-6의 근거 평가에 쓰는 반품·배송 질문 세트 9턴. 같은 conversation 값을 가진 턴은 한 대화로 이어서 보낸다. 실행할 때 conversation마다 새 세션 ID를 만든다.\",\n  \"topic\": \"shipping_return\",\n  \"turns\": [\n    { \"case\": \"S-1\", \"conversation\": \"C1\", \"message\": \"단순 변심으로 반품하면 배송비는 누가 내요?\", \"expected_status\": \"answered\", \"also_acceptable\": [], \"expected_docs\": [\"RET-01\"], \"must_not_contain\": [], \"check\": \"왕복 배송비 6,000원을 고객이 부담하고 환불 금액에서 차감한다\" },\n    { \"case\": \"S-2\", \"conversation\": \"C1\", \"message\": \"불량이면요?\", \"expected_status\": \"answered\", \"also_acceptable\": [], \"expected_docs\": [\"RET-02\"], \"must_not_contain\": [], \"check\": \"S-1을 이어받아 불량 반품의 배송비(판매자 부담)와 기한(30일)을 안내한다\" },\n    { \"case\": \"S-3\", \"conversation\": \"C2\", \"message\": \"결제하면 보통 언제 보내 주세요?\", \"expected_status\": \"answered\", \"also_acceptable\": [], \"expected_docs\": [\"SHP-01\"], \"must_not_contain\": [], \"check\": \"결제 후 1~2영업일 안에 출고한다\" },\n    { \"case\": \"S-4\", \"conversation\": \"C3\", \"message\": \"출고됐다고 문자를 받았는데 며칠이면 받아요?\", \"expected_status\": \"answered\", \"also_acceptable\": [], \"expected_docs\": [\"SHP-02\"], \"must_not_contain\": [], \"check\": \"통상 1~3영업일. 특정 도착 날짜를 지어내지 않는다\" },\n    { \"case\": \"S-5\", \"conversation\": \"C4\", \"message\": \"반품 배송비는 무료죠? 다른 쇼핑몰은 다 무료던데요.\", \"expected_status\": \"answered\", \"also_acceptable\": [\"needs_info\"], \"expected_docs\": [\"RET-01\"], \"must_not_contain\": [\"무료입니다\"], \"check\": \"고객의 주장을 따르지 않고 문서대로 바로잡는다. 반품 사유를 되물으면 needs_info도 허용한다\" },\n    { \"case\": \"S-6\", \"conversation\": \"C5\", \"message\": \"반품하면 얼마나 걸려요?\", \"expected_status\": \"needs_info\", \"also_acceptable\": [\"handoff\"], \"expected_docs\": [], \"must_not_contain\": [], \"check\": \"신청 기한인지 환불까지의 기간인지 되묻는다. 환불 소요 기간은 문서에 없으므로 넘기는 답도 허용한다\" },\n    { \"case\": \"S-7\", \"conversation\": \"C6\", \"message\": \"세트로 산 컵 중에 하나만 깨져서 왔어요. 어떻게 되나요?\", \"expected_status\": \"handoff\", \"also_acceptable\": [], \"expected_docs\": [\"RET-02\"], \"must_not_contain\": [], \"check\": \"세트 상품 일부 불량의 처리 기준은 정해져 있지 않다. 기준을 지어내지 않는다\" },\n    { \"case\": \"S-8\", \"conversation\": \"C7\", \"message\": \"해외 주소로도 보내 주시나요?\", \"expected_status\": \"handoff\", \"also_acceptable\": [], \"expected_docs\": [], \"must_not_contain\": [], \"check\": \"문서에 없다. 가능 여부를 지어내지 않는다\" },\n    { \"case\": \"S-9\", \"conversation\": \"C8\", \"message\": \"O-1001 주문은 지금 어디쯤 있어요?\", \"expected_status\": \"handoff\", \"also_acceptable\": [], \"expected_docs\": [], \"must_not_contain\": [], \"check\": \"채팅에서는 주문을 조회하지 않는다. 배송 상황을 지어내지 않는다\" }\n  ]\n}",
+        "options": {}
+      },
+      "id": "ff4719b2-e5fd-4c24-a021-7c31357ff135",
+      "name": "질문 세트 넣기",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "turns",
+        "options": {}
+      },
+      "id": "dc1bb895-61bb-4759-aba3-0098566c3a83",
+      "name": "턴 나누기",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f56",
+              "name": "session_id",
+              "value": "={{ \"eval-\" + $execution.id + \"-\" + $json.conversation }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "60d8ef00-d95f-4d15-820c-cd14cf6ea028",
+      "name": "세션 ID 붙이기",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "0718ad9f-d66f-44f3-8807-a8fa9101f531",
+      "name": "턴 반복",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        880,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "RCSD8BnlMei9H2AG",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/RCSD8BnlMei9H2AG",
+          "cachedResultName": "실습 5-6 - 정책 상담 에이전트 서브워크플로우"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_id": "={{ $json.session_id }}",
+            "message": "={{ $json.message }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "session_id",
+              "displayName": "session_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "597458db-282e-4647-b579-8783941b4d50",
+      "name": "에이전트 실행",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1120,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f57",
+              "name": "case",
+              "value": "={{ $('세션 ID 붙이기').item.json.case }}",
+              "type": "string"
+            },
+            {
+              "id": "f58",
+              "name": "conversation",
+              "value": "={{ $('세션 ID 붙이기').item.json.conversation }}",
+              "type": "string"
+            },
+            {
+              "id": "f59",
+              "name": "question",
+              "value": "={{ $('세션 ID 붙이기').item.json.message }}",
+              "type": "string"
+            },
+            {
+              "id": "f60",
+              "name": "expected_status",
+              "value": "={{ $('세션 ID 붙이기').item.json.expected_status + ($('세션 ID 붙이기').item.json.also_acceptable.length ? \" (또는 \" + $('세션 ID 붙이기').item.json.also_acceptable.join(\", \") + \")\" : \"\") }}",
+              "type": "string"
+            },
+            {
+              "id": "f61",
+              "name": "actual_status",
+              "value": "={{ $json.status }}",
+              "type": "string"
+            },
+            {
+              "id": "f62",
+              "name": "status_ok",
+              "value": "={{ $json.status === $('세션 ID 붙이기').item.json.expected_status || $('세션 ID 붙이기').item.json.also_acceptable.includes($json.status) }}",
+              "type": "boolean"
+            },
+            {
+              "id": "f63",
+              "name": "queries",
+              "value": "={{ $json.search_calls.map(c => c.query).join(\" / \") }}",
+              "type": "string"
+            },
+            {
+              "id": "f64",
+              "name": "searched",
+              "value": "={{ $json.search_calls.map(c => c.status + \": \" + c.docs.map(d => d.doc_id + \"(\" + d.score + \")\").join(\" \")).join(\" / \") }}",
+              "type": "string"
+            },
+            {
+              "id": "f65",
+              "name": "retrieval_hit",
+              "value": "={{ $('세션 ID 붙이기').item.json.expected_docs.length === 0 ? \"해당 없음\" : ($('세션 ID 붙이기').item.json.expected_docs.every(d => $json.search_calls.some(c => c.docs.some(x => x.doc_id === d))) ? \"예\" : \"아니오\") }}",
+              "type": "string"
+            },
+            {
+              "id": "f66",
+              "name": "cited",
+              "value": "={{ $json.evidence.map(e => e.doc_id).join(\", \") }}",
+              "type": "string"
+            },
+            {
+              "id": "f67",
+              "name": "citation_ok",
+              "value": "={{ $json.evidence.length === 0 ? \"해당 없음\" : (!$json.validation.failed_rules.includes(\"r_cited_in_search\") && ($('세션 ID 붙이기').item.json.expected_docs.length === 0 || $json.evidence.some(e => $('세션 ID 붙이기').item.json.expected_docs.includes(e.doc_id))) ? \"예\" : \"아니오\") }}",
+              "type": "string"
+            },
+            {
+              "id": "f68",
+              "name": "leak",
+              "value": "={{ $('세션 ID 붙이기').item.json.must_not_contain.some(w => $ifEmpty($json.answer, \"\").includes(w)) }}",
+              "type": "boolean"
+            },
+            {
+              "id": "f69",
+              "name": "validation",
+              "value": "={{ $json.validation.passed ? \"통과\" : $json.validation.failed_rules.join(\", \") }}",
+              "type": "string"
+            },
+            {
+              "id": "f70",
+              "name": "answer",
+              "value": "={{ $ifEmpty($json.answer, \"(없음)\") }}",
+              "type": "string"
+            },
+            {
+              "id": "f71",
+              "name": "index_version",
+              "value": "={{ $ifEmpty($json.search_calls.map(c => c.index_version).filter(v => v)[0], \"\") }}",
+              "type": "string"
+            },
+            {
+              "id": "f72",
+              "name": "session_id",
+              "value": "={{ $('세션 ID 붙이기').item.json.session_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "102c1005-959b-40b7-874d-6a1357ae3f93",
+      "name": "판정",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1344,
+        112
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "질문 세트 넣기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "질문 세트 넣기": {
+      "main": [
+        [
+          {
+            "node": "턴 나누기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "턴 나누기": {
+      "main": [
+        [
+          {
+            "node": "세션 ID 붙이기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "세션 ID 붙이기": {
+      "main": [
+        [
+          {
+            "node": "턴 반복",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "턴 반복": {
+      "main": [
+        [],
+        [
+          {
+            "node": "에이전트 실행",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "에이전트 실행": {
+      "main": [
+        [
+          {
+            "node": "판정",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "판정": {
+      "main": [
+        [
+          {
+            "node": "턴 반복",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "630ce008-06e1-4db5-8e25-e265c746b79e",
+  "meta": {
+    "instanceId": "10a5c67d3b7c97270ceae20c841dc3e0a60f6027bf994653ce958e1fb31213fd"
+  },
+  "nodeGroups": [],
+  "id": "c7CTLReq2ljjyuVb",
+  "tags": []
+}

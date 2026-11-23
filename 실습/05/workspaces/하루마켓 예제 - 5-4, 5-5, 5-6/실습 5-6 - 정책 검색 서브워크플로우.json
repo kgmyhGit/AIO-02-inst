@@ -1,0 +1,408 @@
+{
+  "name": "실습 5-6 - 정책 검색 서브워크플로우",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "query"
+            },
+            {
+              "name": "group"
+            }
+          ]
+        }
+      },
+      "id": "9a539c09-abf3-4345-bcca-20275e1f4f28",
+      "name": "검색 입력",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f27",
+              "name": "query",
+              "value": "={{ $json.query }}",
+              "type": "string"
+            },
+            {
+              "id": "f28",
+              "name": "group",
+              "value": "={{ $json.group }}",
+              "type": "string"
+            },
+            {
+              "id": "f29",
+              "name": "limit",
+              "value": 4,
+              "type": "number"
+            },
+            {
+              "id": "f30",
+              "name": "score_threshold",
+              "value": 0.62,
+              "type": "number"
+            },
+            {
+              "id": "f31",
+              "name": "score_direction",
+              "value": "lower_is_closer",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3b35585a-5d12-47a5-b9db-3628467ef147",
+      "name": "검색 설정",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "load",
+        "tableName": "policy_chunks",
+        "prompt": "={{ $json.query }}",
+        "topK": "={{ $json.limit }}",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "group",
+                "value": "={{ $json.group }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "a9c2c155-3fda-4204-8513-61ad38a1caba",
+      "name": "정책 청크 검색",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1.3,
+      "position": [
+        416,
+        160
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "o6djLzRhM15EW36h",
+          "name": "Postgres account - harumarketDB"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-large",
+        "options": {}
+      },
+      "id": "274768eb-a69e-4db6-a2b8-191adea12dad",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        384,
+        368
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "xeLFhtHww0Dj9GaF",
+          "name": "OpenAI Encore Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f32",
+              "leftValue": "={{ $json.document === undefined && $json.query !== undefined }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f4be87f7-3077-4ddf-bbad-c86c48f21587",
+      "name": "검색이 실패했는가",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        704,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "hits",
+        "options": {}
+      },
+      "id": "686c3181-99eb-4ae3-a7ac-1a884e6092a5",
+      "name": "검색 결과 모으기",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        928,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f33",
+              "name": "returned",
+              "value": "={{ $json.hits.filter(h => h.document).length }}",
+              "type": "number"
+            },
+            {
+              "id": "f34",
+              "name": "kept",
+              "value": "={{ $json.hits.filter(h => h.document && h.score <= $('검색 설정').item.json.score_threshold).map(h => ({ doc_id: h.document.metadata.doc_id, title: h.document.metadata.title, version: h.document.metadata.version, text: h.document.pageContent, score: Math.round(h.score * 1000) / 1000 })) }}",
+              "type": "array"
+            },
+            {
+              "id": "f35",
+              "name": "index_version",
+              "value": "={{ $ifEmpty($json.hits.filter(h => h.document).map(h => h.document.metadata.index_version)[0], \"\") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "43a7eb74-5b61-4b67-ab6c-16d54af905ad",
+      "name": "기준 적용",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1152,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f36",
+              "leftValue": "={{ $json.kept.length }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              },
+              "rightValue": 0
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ba79b31e-43f3-4c24-817d-8e297042d22d",
+      "name": "기준 안의 결과가 있는가",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1360,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.stringify({\n  status: \"ok\",\n  answer: $json.kept,\n  evidence: {\n    source: \"policy_chunks\",\n    query: $('검색 설정').item.json.query,\n    group: $('검색 설정').item.json.group,\n    limit: $('검색 설정').item.json.limit,\n    score_threshold: $('검색 설정').item.json.score_threshold,\n    score_direction: $('검색 설정').item.json.score_direction,\n    returned: $json.returned,\n    index_version: $json.index_version,\n    searched_at: $now.toISO()\n  }\n}) }}",
+        "options": {}
+      },
+      "id": "267c15be-ca4b-4cc3-985a-04dc54c644c3",
+      "name": "결과: 찾음",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1600,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.stringify({\n  status: \"no_match\",\n  answer: null,\n  evidence: {\n    source: \"policy_chunks\",\n    query: $('검색 설정').item.json.query,\n    group: $('검색 설정').item.json.group,\n    limit: $('검색 설정').item.json.limit,\n    score_threshold: $('검색 설정').item.json.score_threshold,\n    score_direction: $('검색 설정').item.json.score_direction,\n    returned: $json.returned,\n    index_version: $json.index_version,\n    searched_at: $now.toISO()\n  }\n}) }}",
+        "options": {}
+      },
+      "id": "c6f114d2-3198-47f7-ab95-fd83d4db53ca",
+      "name": "결과: 근거 없음",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1600,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.stringify({\n  status: \"search_error\",\n  answer: null,\n  evidence: {\n    source: \"policy_chunks\",\n    query: $('검색 설정').item.json.query,\n    group: $('검색 설정').item.json.group,\n    returned: 0,\n    searched_at: $now.toISO()\n  }\n}) }}",
+        "options": {}
+      },
+      "id": "889e28a4-acc9-498f-8150-d054683a126a",
+      "name": "결과: 검색 오류",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        928,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "검색 입력": {
+      "main": [
+        [
+          {
+            "node": "검색 설정",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "검색 설정": {
+      "main": [
+        [
+          {
+            "node": "정책 청크 검색",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "정책 청크 검색": {
+      "main": [
+        [
+          {
+            "node": "검색이 실패했는가",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "검색이 실패했는가": {
+      "main": [
+        [
+          {
+            "node": "결과: 검색 오류",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "검색 결과 모으기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "검색 결과 모으기": {
+      "main": [
+        [
+          {
+            "node": "기준 적용",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "기준 적용": {
+      "main": [
+        [
+          {
+            "node": "기준 안의 결과가 있는가",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "기준 안의 결과가 있는가": {
+      "main": [
+        [
+          {
+            "node": "결과: 찾음",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "결과: 근거 없음",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "정책 청크 검색",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "90da697f-304e-41fc-8883-ce00c4d1257f",
+  "meta": {
+    "instanceId": "10a5c67d3b7c97270ceae20c841dc3e0a60f6027bf994653ce958e1fb31213fd"
+  },
+  "nodeGroups": [],
+  "id": "rdXPlVs7tS2hZzlN",
+  "tags": []
+}

@@ -1,0 +1,487 @@
+{
+  "name": "실습 5-6 - 정책 상담 채팅",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "d382afc6-afd4-4015-8d1f-2b7b3c620697",
+      "name": "채팅 받기",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        80,
+        176
+      ],
+      "webhookId": "74e2bcea-b6a2-5c90-85c5-8c4b8861bf47"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO chat_sessions (session_id, topic, turn_count)\nVALUES ($1, $2, 1)\nON CONFLICT (session_id) DO UPDATE\nSET turn_count = chat_sessions.turn_count + 1, last_message_at = now()\nRETURNING session_id, status, turn_count, needs_info_count;",
+        "options": {
+          "queryReplacement": "={{ [ $json.sessionId, \"shipping_return\" ] }}"
+        }
+      },
+      "id": "29bf3e32-5753-4e26-84c4-61485477d132",
+      "name": "세션 기록",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        256,
+        176
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "o6djLzRhM15EW36h",
+          "name": "Postgres account - harumarketDB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f46",
+              "name": "output",
+              "value": "이 대화는 담당자에게 전달되었습니다. 담당자의 답변을 기다려 주세요. 다른 질문은 새 대화에서 해 주세요.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8730a0fc-acd4-4186-8a85-0438f17936a0",
+      "name": "답변: 넘긴 세션",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "RCSD8BnlMei9H2AG",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/RCSD8BnlMei9H2AG",
+          "cachedResultName": "실습 5-6 - 정책 상담 에이전트 서브워크플로우"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "session_id": "={{ $('채팅 받기').item.json.sessionId }}",
+            "message": "={{ $('채팅 받기').item.json.chatInput }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "session_id",
+              "displayName": "session_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "68a2217d-e0e3-40f8-aa7c-6829f68d9055",
+      "name": "상담 에이전트 실행",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        672,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f47",
+              "name": "needs_info_count",
+              "value": "={{ $json.status === \"needs_info\"\n     ? $('세션 기록').item.json.needs_info_count + 1\n     : ($json.status === \"answered\" ? 0 : $('세션 기록').item.json.needs_info_count) }}",
+              "type": "number"
+            },
+            {
+              "id": "f48",
+              "name": "final_status",
+              "value": "={{ ($json.status === \"needs_info\" && $('세션 기록').item.json.needs_info_count + 1 > 2) ? \"handoff\" : $json.status }}",
+              "type": "string"
+            },
+            {
+              "id": "f49",
+              "name": "handoff_reason",
+              "value": "={{ !$json.validation.passed\n  ? ($json.validation.failed_rules.includes(\"output_format\") ? \"output_format\" : \"validation_failed\")\n  : ($json.status === \"needs_info\" && $('세션 기록').item.json.needs_info_count + 1 > 2)\n    ? \"info_limit\"\n    : $json.status !== \"handoff\"\n      ? \"\"\n      : $json.search_calls.some(c => c.status === \"search_error\")\n        ? \"search_error\"\n        : ($json.search_calls.length > 0 && $json.search_calls.every(c => c.status === \"no_match\"))\n          ? \"no_evidence\"\n          : \"agent_handoff\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "831b572c-f44d-4a8e-b1ed-317cabb8a5a0",
+      "name": "턴 결과 정하기",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        848,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE chat_sessions\nSET needs_info_count = $2,\n    status          = CASE WHEN $3 = 'handoff' THEN 'handed_off' ELSE status END,\n    handoff_reason  = CASE WHEN $3 = 'handoff' THEN $4 ELSE handoff_reason END,\n    handed_off_at   = CASE WHEN $3 = 'handoff' THEN now() ELSE handed_off_at END\nWHERE session_id = $1\nRETURNING session_id, status;",
+        "options": {
+          "queryReplacement": "={{ [ $('채팅 받기').item.json.sessionId, $json.needs_info_count, $json.final_status, $json.handoff_reason ] }}"
+        }
+      },
+      "id": "6204a91f-e34d-4ea9-b327-01205d8312d9",
+      "name": "세션 상태 갱신",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1024,
+        272
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "o6djLzRhM15EW36h",
+          "name": "Postgres account - harumarketDB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f50",
+                    "leftValue": "={{ $('턴 결과 정하기').item.json.final_status }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "answered"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "answered"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f51",
+                    "leftValue": "={{ $('턴 결과 정하기').item.json.final_status }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "needs_info"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "needs_info"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f52",
+                    "leftValue": "={{ $('턴 결과 정하기').item.json.final_status }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "handoff"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "handoff"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "dd65ece3-74c2-4b7e-9b3c-1d45ec06235d",
+      "name": "답변 고르기",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1216,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f53",
+              "name": "output",
+              "value": "={{ $('턴 결과 정하기').item.json.answer + \"\\n\\n참고한 규정: \" + $('턴 결과 정하기').item.json.sources.map(s => s.title + \"(\" + s.doc_id + \")\").join(\", \") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e0ca1bd0-cc7c-4e84-9652-af09cdf1181a",
+      "name": "답변: 안내",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1472,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f54",
+              "name": "output",
+              "value": "={{ $('턴 결과 정하기').item.json.answer }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cccdcc7c-e91b-4b35-9500-f6a64d4ab3cb",
+      "name": "답변: 확인 질문",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1472,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f55",
+              "name": "output",
+              "value": "문의하신 내용은 정책 문서만으로 정확히 안내하기 어려워 담당자가 확인한 뒤 답변드리겠습니다. 주문과 관련된 문의라면 문의 양식에 주문번호와 성함을 적어 보내 주세요. 다른 질문은 새 대화에서 해 주세요.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7ee3828a-3ac7-4c37-a98c-55cab5c99f2d",
+      "name": "답변: 담당자 연결",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1472,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f45",
+              "leftValue": "={{ $json.status }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "handed_off"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "3e5eaccd-7c4e-4c43-926a-951d6627a3ea",
+      "name": "담당자에게 넘긴 대화 세션인가",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        432,
+        176
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "채팅 받기": {
+      "main": [
+        [
+          {
+            "node": "세션 기록",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "세션 기록": {
+      "main": [
+        [
+          {
+            "node": "담당자에게 넘긴 대화 세션인가",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "상담 에이전트 실행": {
+      "main": [
+        [
+          {
+            "node": "턴 결과 정하기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "턴 결과 정하기": {
+      "main": [
+        [
+          {
+            "node": "세션 상태 갱신",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "세션 상태 갱신": {
+      "main": [
+        [
+          {
+            "node": "답변 고르기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "답변 고르기": {
+      "main": [
+        [
+          {
+            "node": "답변: 안내",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "답변: 확인 질문",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "답변: 담당자 연결",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "답변: 담당자 연결",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "담당자에게 넘긴 대화 세션인가": {
+      "main": [
+        [
+          {
+            "node": "답변: 넘긴 세션",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "상담 에이전트 실행",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "991a995a-d5e9-443a-8137-85f1d32ff953",
+  "meta": {
+    "instanceId": "10a5c67d3b7c97270ceae20c841dc3e0a60f6027bf994653ce958e1fb31213fd"
+  },
+  "nodeGroups": [],
+  "id": "JnCEVWWybkcSiODB",
+  "tags": []
+}

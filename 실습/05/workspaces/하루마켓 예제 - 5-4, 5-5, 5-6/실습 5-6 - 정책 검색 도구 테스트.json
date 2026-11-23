@@ -1,0 +1,181 @@
+{
+  "name": "실습 5-6 - 정책 검색 도구 테스트",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "fc8705c9-e593-4cd4-b577-fe1465903baa",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        80,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"description\": \"5장 실습 5-5의 검색 확인에 쓰는 질문 6개. Q-1~Q-4는 반품·배송 정책 문서에 답이 있고, Q-5와 Q-6은 어느 문서에도 답이 없다. 답이 없는 질문도 검색 결과가 나오는지와 점수가 어떻게 다른지 비교한다.\",\n  \"group\": \"shipping_return\",\n  \"questions\": [\n    { \"id\": \"Q-1\", \"question\": \"단순 변심으로 반품하면 배송비는 누가 내요?\", \"expected_doc\": \"RET-01\", \"has_answer\": true },\n    { \"id\": \"Q-2\", \"question\": \"받은 상품이 깨져 있으면 언제까지 반품할 수 있나요?\", \"expected_doc\": \"RET-02\", \"has_answer\": true },\n    { \"id\": \"Q-3\", \"question\": \"결제하고 나서 며칠 만에 상품을 보내 주세요?\", \"expected_doc\": \"SHP-01\", \"has_answer\": true },\n    { \"id\": \"Q-4\", \"question\": \"출고됐다는 문자를 받은 지 일주일이 넘었는데 아직 안 와요\", \"expected_doc\": \"SHP-02\", \"has_answer\": true },\n    { \"id\": \"Q-5\", \"question\": \"해외 주소로도 배송해 주시나요?\", \"expected_doc\": null, \"has_answer\": false },\n    { \"id\": \"Q-6\", \"question\": \"적립금은 언제 소멸되나요?\", \"expected_doc\": null, \"has_answer\": false }\n  ]\n}",
+        "options": {}
+      },
+      "id": "7c8a822b-9976-49cb-b39c-70ae040e3ee7",
+      "name": "질문 넣기",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        304,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "questions",
+        "options": {}
+      },
+      "id": "6f1773f3-4f4d-40ec-b82b-d5c261a9c31a",
+      "name": "질문 나누기",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        528,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "bce1d822-220a-4d53-a77b-c99d2b7af863",
+      "name": "질문 반복",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        752,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "ekU1e14hrlsxJMKo",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/ekU1e14hrlsxJMKo",
+          "cachedResultName": "실습 5-6 - 정책 검색 서브워크플로우"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query": "={{ $json.question }}",
+            "group": "shipping_return"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "group",
+              "displayName": "group",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "fcbe8d34-d010-4cf0-b456-475f067a83e2",
+      "name": "정책 검색 실행",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        992,
+        320
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "질문 넣기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "질문 넣기": {
+      "main": [
+        [
+          {
+            "node": "질문 나누기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "질문 나누기": {
+      "main": [
+        [
+          {
+            "node": "질문 반복",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "질문 반복": {
+      "main": [
+        [],
+        [
+          {
+            "node": "정책 검색 실행",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "정책 검색 실행": {
+      "main": [
+        [
+          {
+            "node": "질문 반복",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1129b909-f157-49cd-a5fd-69c7f851b77a",
+  "meta": {
+    "instanceId": "10a5c67d3b7c97270ceae20c841dc3e0a60f6027bf994653ce958e1fb31213fd"
+  },
+  "nodeGroups": [],
+  "id": "7sL7R1wFEvT8f9E9",
+  "tags": []
+}
