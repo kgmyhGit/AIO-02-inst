@@ -1,0 +1,143 @@
+{
+  "description": "6장 실습 6-3의 확인에 쓰는 반품 승인 시험 사례다. 문의 원문과 주문 정보는 2장 실습/02/템플릿_가이드/data의 반품요청_사례.csv, 주문목록.csv와 같다. 경과일과 금액은 기준일 2026-09-10으로 계산한 값이다. 승인·거절·기한 경과는 실습하는 사람이 담당자 역할로 직접 만든다. 가상 데이터다.",
+  "as_of": "2026-09-10",
+  "policy": {
+    "return_deadline_days": 7,
+    "shipping_fee": 6000,
+    "policy_ref_simple_change": "RET-01",
+    "policy_ref_defect": "RET-02"
+  },
+  "cases": [
+    {
+      "case": "A-1",
+      "label": "정상 승인 후 집행",
+      "inquiry_id": "INQ-004",
+      "customer_name": "최민지",
+      "order_id": "O-1004",
+      "message": "셔츠 사이즈가 생각보다 커서 반품하고 싶어요. 입어 보지는 않았고 택도 그대로 있어요.",
+      "staff_action": "승인",
+      "expected": {
+        "decision": "eligible",
+        "days_since_delivery": 3,
+        "policy_ref": "RET-01",
+        "refund_amount": 33000,
+        "path": "T12 → T13 → T19 → T20",
+        "final_request_status": "closed",
+        "approval_status": "approved",
+        "approved_refund_amount": 33000,
+        "execution_id_prefix": "RFD-",
+        "close_reason": "completed"
+      },
+      "check": "승인 번호가 발급되고, 집행 요청의 request_id가 그 승인 번호와 같은지 확인한다. 검수 통과 뒤에 집행되었는지도 확인한다"
+    },
+    {
+      "case": "A-2",
+      "label": "기한 초과로 불가 안내",
+      "inquiry_id": "INQ-012",
+      "customer_name": "문서윤",
+      "order_id": "O-1012",
+      "message": "선물하려고 산 니트 조끼가 필요 없어져서 반품 신청합니다. 포장도 뜯지 않았어요.",
+      "staff_action": "없음",
+      "expected": {
+        "decision": "not_eligible",
+        "days_since_delivery": 14,
+        "policy_ref": "RET-01",
+        "refund_amount": null,
+        "path": "T10",
+        "final_request_status": "closed",
+        "approval_status": null,
+        "approved_refund_amount": null,
+        "execution_id_prefix": null,
+        "close_reason": "not_eligible"
+      },
+      "check": "승인 요청 메일이 나가지 않았는지, notifications에 approval_request 기록이 없는지 확인한다"
+    },
+    {
+      "case": "A-3",
+      "label": "담당자 거절",
+      "inquiry_id": "INQ-013",
+      "customer_name": "한서준",
+      "order_id": "O-1013",
+      "message": "슬랙스 기장이 길어서 반품할게요. 입어 보지 않았고 택도 있어요. 사진 첨부합니다.",
+      "staff_action": "거절. 사유는 '첨부 사진에서 택이 제거된 것을 확인'",
+      "expected": {
+        "decision": "eligible",
+        "days_since_delivery": 2,
+        "policy_ref": "RET-01",
+        "refund_amount": 43000,
+        "path": "T12 → T14",
+        "final_request_status": "under_review",
+        "approval_status": "rejected",
+        "approved_refund_amount": null,
+        "execution_id_prefix": null,
+        "handover_reason": "approval_rejected"
+      },
+      "check": "거절 사유가 approval_note에 남았는지, 승인 번호가 발급되지 않았는지, 회수 요청과 환불 집행이 없는지 확인한다"
+    },
+    {
+      "case": "A-4",
+      "label": "기한 경과 알림과 만료",
+      "inquiry_id": "INQ-014",
+      "customer_name": "오지민",
+      "order_id": "O-1014",
+      "message": "러닝화 발볼이 좁아서 반품하고 싶어요. 박스와 택 모두 그대로 있어요.",
+      "staff_action": "응답하지 않는다. 기한이 지나도록 둔다",
+      "expected": {
+        "decision": "eligible",
+        "days_since_delivery": 1,
+        "policy_ref": "RET-01",
+        "refund_amount": 83000,
+        "path": "T12 → T15 → T16",
+        "final_request_status": "under_review",
+        "approval_status": "expired",
+        "approved_refund_amount": null,
+        "execution_id_prefix": null,
+        "handover_reason": "approval_expired"
+      },
+      "check": "팀장 알림 메일이 한 통만 왔는지 확인한다. 기한 확인 워크플로우를 세 번 실행해도 알림은 한 통이어야 한다. lead_notified_at 값이 남아 있는지 확인한다"
+    },
+    {
+      "case": "A-5",
+      "label": "승인했지만 검수에서 문제 발견",
+      "inquiry_id": "INQ-015",
+      "customer_name": "임나연",
+      "order_id": "O-1015",
+      "message": "블라우스가 생각보다 얇아서 반품 원합니다. 착용하지 않았습니다.",
+      "staff_action": "승인한 뒤, 진행 통지에서 '검수 불합격'을 고른다",
+      "expected": {
+        "decision": "eligible",
+        "days_since_delivery": 2,
+        "policy_ref": "RET-01",
+        "refund_amount": 39000,
+        "path": "T12 → T13 → T19 → T21",
+        "final_request_status": "under_review",
+        "approval_status": "approved",
+        "approved_refund_amount": 39000,
+        "execution_id_prefix": null,
+        "handover_reason": "inspection_failed"
+      },
+      "check": "승인을 받았는데도 환불이 집행되지 않았는지 확인한다. 승인은 '검수를 통과하면 이 금액으로 환불한다'는 결정이다"
+    },
+    {
+      "case": "A-6",
+      "label": "집행 직전 재검증 실패",
+      "inquiry_id": "INQ-004",
+      "customer_name": "최민지",
+      "order_id": "O-1004",
+      "message": "A-1과 같은 문의를 새로 접수해 승인까지 진행한다.",
+      "staff_action": "승인한 뒤, 검수 통과를 알리기 전에 요청 기록의 evidence.refund_amount를 39000으로 직접 고친다",
+      "setup_sql": "UPDATE requests SET evidence = jsonb_set(evidence, '{refund_amount}', '39000') WHERE request_id = '<이 사례의 요청 번호>';",
+      "expected": {
+        "decision": "eligible",
+        "refund_amount": 39000,
+        "path": "T12 → T13 → T19 → 재검증 실패",
+        "final_request_status": "under_review",
+        "approval_status": "approved",
+        "approved_refund_amount": 33000,
+        "execution_id_prefix": null,
+        "handover_reason": "revalidation_failed"
+      },
+      "check": "모의 API의 /health에서 executions 값이 늘지 않았는지 확인한다. 승인한 금액(33000)과 지금 금액(39000)이 다르므로 집행하지 않아야 한다"
+    }
+  ]
+}
