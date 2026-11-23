@@ -1,0 +1,202 @@
+{
+  "name": "05_Paul Graham 에세이 - 챗봇 2",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -160,
+        -64
+      ],
+      "id": "7f9595b3-51ea-4820-85bf-47a26e4a10f4",
+      "name": "When chat message received",
+      "webhookId": "4195ab0d-df9c-4edb-8e7e-c783a9386d2a"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "너는 Paul Graham의 에세이를 근거로 질문에 답하는 도우미다.\n\n- 답하기 전에 반드시 paul_graham_search 도구로 에세이를 검색한다.\n- 검색 결과에 있는 내용만 근거로 답한다. 검색 결과에 없으면 \"검색한 에세이에서 찾지 못했습니다.\"라고 답한다.\n- 에세이는 영어로 쓰여 있으므로 검색어는 영어로 만든다.\n- 답은 사용자가 쓴 언어로 쓴다.\n- 답의 끝에 근거로 쓴 에세이의 제목(title)과 날짜(date)를 적는다. 찾지 못했다고 답할 때는 출처를 적지 않는다."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        96,
+        -64
+      ],
+      "id": "7dab4991-fe65-478e-afd4-e04ffca0a6d6",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "content": "### Vector Store를 도구로 사용\n\n- AI Agent가 필요할 때 Vector Store를 검색하도록 한다.",
+        "height": 80,
+        "width": 416
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        64,
+        -144
+      ],
+      "typeVersion": 1,
+      "id": "67ac298f-05ea-46f3-b1f3-923b58f3e689",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-6-luna"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -16,
+        144
+      ],
+      "id": "5237f07a-3fdb-4137-8e83-b18313453deb",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "0aIIz13kma79hikH",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        176,
+        144
+      ],
+      "id": "09d14186-55a5-40f0-8547-c8c585d455b4",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Paul Graham의 에세이(스타트업, 창업, 프로그래밍, 글쓰기 등)에서 질문과 관련된 부분을 검색한다. 검색어는 영어 문장으로 넣는다. 결과마다 본문과 함께 title, date 메타데이터가 있다.",
+        "tableName": "pg_essays",
+        "topK": 5,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1.3,
+      "position": [
+        320,
+        144
+      ],
+      "id": "2fa10545-6277-4a98-86fe-f2e4f2d5cfd6",
+      "name": "Postgres PGVector Store",
+      "credentials": {
+        "postgres": {
+          "id": "T6S8CzKEHQ9N6fGD",
+          "name": "n8n_exam DB Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-large",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        320,
+        304
+      ],
+      "id": "2157be06-96a2-48ba-86ca-3678bf9f2dcf",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "0aIIz13kma79hikH",
+          "name": "OpenAI account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres PGVector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Postgres PGVector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "04ca0bca-2fb8-4c0e-be98-e4f369da24f2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae"
+  },
+  "nodeGroups": [],
+  "id": "0FW7V4bPNvAZLU8G",
+  "tags": []
+}
