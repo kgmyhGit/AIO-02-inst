@@ -1,0 +1,28 @@
+info:
+  name: 5장 반품문의관련 예제
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: https://glisten-italicize-designate.ngrok-free.dev/webhook/harumarket-inquiry
+  body:
+    type: json
+    data: |-
+      {
+              "name": "최민지",
+              "order_no": "O-1004",
+              "content": "셔츠 사이즈가 생각보다 커서 반품하고 싶어요. 입어 보지는 않았고 택도 그대로 있어요.",
+              "agree_privacy": true
+            }
+  auth:
+    type: apikey
+    key: X-API-Key
+    value: alskdjflka9087sdaflkjjxcvkl23=
+    placement: header
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

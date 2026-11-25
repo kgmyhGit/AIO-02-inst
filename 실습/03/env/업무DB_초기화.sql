@@ -11,9 +11,9 @@
 --
 -- 3장에서는 이 테이블을 읽기만 한다. 워크플로우가 값을 넣고 바꾸는 일은 4장 이후에 다룬다.
 
-CREATE DATABASE harumarket;
+-- CREATE DATABASE harumarket;
 
-\connect harumarket
+-- \connect harumarket
 
 -- 문의 기록: 고객이 보낸 메시지 한 통을 남긴다.
 CREATE TABLE inquiries (
