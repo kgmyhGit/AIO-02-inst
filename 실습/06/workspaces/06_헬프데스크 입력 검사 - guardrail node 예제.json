@@ -80,17 +80,67 @@
       "parameters": {
         "text": "={{ $json.guardrailsInput }}",
         "guardrails": {
-          "keywords": "시스템 프롬프트,관리자 모드"
+          "keywords": "시스템 프롬프트,관리자 모드",
+          "jailbreak": {
+            "value": {
+              "threshold": 0.7
+            }
+          },
+          "nsfw": {
+            "value": {
+              "threshold": 0.7
+            }
+          },
+          "topicalAlignment": {
+            "value": {
+              "threshold": 0.7,
+              "prompt": "You are a content analysis system that determines if text stays on topic.\n\nBUSINESS SCOPE: 사내 IT 헬프데스크. 업무용 PC와 노트북, 모니터와 프린터, 사내 계정과 비밀번호, VPN과 사내 네트워크, 메일과 메신저, 사무용 소프트웨어 설치와 오류 관련 문의.\n\nDetermine if the text stays within the defined business scope. Flag any content\nthat strays from the allowed topics."
+            }
+          },
+          "customRegex": {
+            "regex": [
+              {
+                "name": "역할 모드 표현",
+                "value": "/(관리자|개발자|시스템) *모드/g"
+              }
+            ]
+          }
         }
       },
       "type": "@n8n/n8n-nodes-langchain.guardrails",
       "typeVersion": 2,
       "position": [
-        480,
-        -16
+        384,
+        -96
       ],
       "id": "67dabaaf-d0d0-45fa-86ca-55173f439c70",
       "name": "입력 검사"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-6-luna"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        368,
+        96
+      ],
+      "id": "b2442ebb-7120-460f-8cb3-9a1c2dcf7649",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "0aIIz13kma79hikH",
+          "name": "OpenAI account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -127,6 +177,17 @@
           }
         ]
       ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "입력 검사",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -134,8 +195,9 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "465a6845-a115-433e-bdf3-7c3a98f6f6f8",
+  "versionId": "b2b77a61-6930-43a5-8bdd-457374508efa",
   "meta": {
+    "templateCredsSetupCompleted": true,
     "instanceId": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae"
   },
   "nodeGroups": [],
