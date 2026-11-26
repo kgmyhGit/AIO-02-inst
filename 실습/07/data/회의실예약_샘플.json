@@ -1,0 +1,285 @@
+{
+  "description": "7장 실습 7-5의 Data table rooms에 넣는 값. 가상 회사의 회의실 네 곳, 2026-09-21~25의 오전·오후 예약 여부다. booked가 true면 이미 예약되어 쓸 수 없다.",
+  "rows": [
+    {
+      "room": "소회의실 A",
+      "capacity": 8,
+      "date": "2026-09-21",
+      "slot": "오전",
+      "booked": false
+    },
+    {
+      "room": "소회의실 A",
+      "capacity": 8,
+      "date": "2026-09-21",
+      "slot": "오후",
+      "booked": false
+    },
+    {
+      "room": "소회의실 A",
+      "capacity": 8,
+      "date": "2026-09-22",
+      "slot": "오전",
+      "booked": false
+    },
+    {
+      "room": "소회의실 A",
+      "capacity": 8,
+      "date": "2026-09-22",
+      "slot": "오후",
+      "booked": false
+    },
+    {
+      "room": "소회의실 A",
+      "capacity": 8,
+      "date": "2026-09-23",
+      "slot": "오전",
+      "booked": false
+    },
+    {
+      "room": "소회의실 A",
+      "capacity": 8,
+      "date": "2026-09-23",
+      "slot": "오후",
+      "booked": false
+    },
+    {
+      "room": "소회의실 A",
+      "capacity": 8,
+      "date": "2026-09-24",
+      "slot": "오전",
+      "booked": false
+    },
+    {
+      "room": "소회의실 A",
+      "capacity": 8,
+      "date": "2026-09-24",
+      "slot": "오후",
+      "booked": true
+    },
+    {
+      "room": "소회의실 A",
+      "capacity": 8,
+      "date": "2026-09-25",
+      "slot": "오전",
+      "booked": false
+    },
+    {
+      "room": "소회의실 A",
+      "capacity": 8,
+      "date": "2026-09-25",
+      "slot": "오후",
+      "booked": false
+    },
+    {
+      "room": "중회의실 B",
+      "capacity": 16,
+      "date": "2026-09-21",
+      "slot": "오전",
+      "booked": false
+    },
+    {
+      "room": "중회의실 B",
+      "capacity": 16,
+      "date": "2026-09-21",
+      "slot": "오후",
+      "booked": false
+    },
+    {
+      "room": "중회의실 B",
+      "capacity": 16,
+      "date": "2026-09-22",
+      "slot": "오전",
+      "booked": false
+    },
+    {
+      "room": "중회의실 B",
+      "capacity": 16,
+      "date": "2026-09-22",
+      "slot": "오후",
+      "booked": false
+    },
+    {
+      "room": "중회의실 B",
+      "capacity": 16,
+      "date": "2026-09-23",
+      "slot": "오전",
+      "booked": true
+    },
+    {
+      "room": "중회의실 B",
+      "capacity": 16,
+      "date": "2026-09-23",
+      "slot": "오후",
+      "booked": false
+    },
+    {
+      "room": "중회의실 B",
+      "capacity": 16,
+      "date": "2026-09-24",
+      "slot": "오전",
+      "booked": false
+    },
+    {
+      "room": "중회의실 B",
+      "capacity": 16,
+      "date": "2026-09-24",
+      "slot": "오후",
+      "booked": false
+    },
+    {
+      "room": "중회의실 B",
+      "capacity": 16,
+      "date": "2026-09-25",
+      "slot": "오전",
+      "booked": true
+    },
+    {
+      "room": "중회의실 B",
+      "capacity": 16,
+      "date": "2026-09-25",
+      "slot": "오후",
+      "booked": false
+    },
+    {
+      "room": "대회의실 C",
+      "capacity": 30,
+      "date": "2026-09-21",
+      "slot": "오전",
+      "booked": true
+    },
+    {
+      "room": "대회의실 C",
+      "capacity": 30,
+      "date": "2026-09-21",
+      "slot": "오후",
+      "booked": false
+    },
+    {
+      "room": "대회의실 C",
+      "capacity": 30,
+      "date": "2026-09-22",
+      "slot": "오전",
+      "booked": false
+    },
+    {
+      "room": "대회의실 C",
+      "capacity": 30,
+      "date": "2026-09-22",
+      "slot": "오후",
+      "booked": false
+    },
+    {
+      "room": "대회의실 C",
+      "capacity": 30,
+      "date": "2026-09-23",
+      "slot": "오전",
+      "booked": false
+    },
+    {
+      "room": "대회의실 C",
+      "capacity": 30,
+      "date": "2026-09-23",
+      "slot": "오후",
+      "booked": false
+    },
+    {
+      "room": "대회의실 C",
+      "capacity": 30,
+      "date": "2026-09-24",
+      "slot": "오전",
+      "booked": false
+    },
+    {
+      "room": "대회의실 C",
+      "capacity": 30,
+      "date": "2026-09-24",
+      "slot": "오후",
+      "booked": true
+    },
+    {
+      "room": "대회의실 C",
+      "capacity": 30,
+      "date": "2026-09-25",
+      "slot": "오전",
+      "booked": false
+    },
+    {
+      "room": "대회의실 C",
+      "capacity": 30,
+      "date": "2026-09-25",
+      "slot": "오후",
+      "booked": true
+    },
+    {
+      "room": "세미나실 D",
+      "capacity": 50,
+      "date": "2026-09-21",
+      "slot": "오전",
+      "booked": false
+    },
+    {
+      "room": "세미나실 D",
+      "capacity": 50,
+      "date": "2026-09-21",
+      "slot": "오후",
+      "booked": false
+    },
+    {
+      "room": "세미나실 D",
+      "capacity": 50,
+      "date": "2026-09-22",
+      "slot": "오전",
+      "booked": false
+    },
+    {
+      "room": "세미나실 D",
+      "capacity": 50,
+      "date": "2026-09-22",
+      "slot": "오후",
+      "booked": true
+    },
+    {
+      "room": "세미나실 D",
+      "capacity": 50,
+      "date": "2026-09-23",
+      "slot": "오전",
+      "booked": false
+    },
+    {
+      "room": "세미나실 D",
+      "capacity": 50,
+      "date": "2026-09-23",
+      "slot": "오후",
+      "booked": false
+    },
+    {
+      "room": "세미나실 D",
+      "capacity": 50,
+      "date": "2026-09-24",
+      "slot": "오전",
+      "booked": false
+    },
+    {
+      "room": "세미나실 D",
+      "capacity": 50,
+      "date": "2026-09-24",
+      "slot": "오후",
+      "booked": true
+    },
+    {
+      "room": "세미나실 D",
+      "capacity": 50,
+      "date": "2026-09-25",
+      "slot": "오전",
+      "booked": false
+    },
+    {
+      "room": "세미나실 D",
+      "capacity": 50,
+      "date": "2026-09-25",
+      "slot": "오후",
+      "booked": false
+    }
+  ]
+}

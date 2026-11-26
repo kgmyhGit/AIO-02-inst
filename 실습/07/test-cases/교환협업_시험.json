@@ -1,0 +1,175 @@
+{
+  "description": "7장 실습 7-8의 시험 요청 다섯 건과 네 가지 시험. 요청은 업무DB_7장변경.sql이 넣는다. 재고는 6장 모의 API의 stock.csv 값이다.",
+  "as_of": "2026-09-10",
+  "tests": [
+    {
+      "name": "위임 실패",
+      "requests": [
+        "REQ-7104"
+      ],
+      "how": "정책 검색 서브워크플로우를 잠시 Unpublish하고 처리한다",
+      "expected_end_reason": "delegation_failed",
+      "must": "승인 요청이 나가지 않는다"
+    },
+    {
+      "name": "상충 결과",
+      "requests": [
+        "REQ-7102"
+      ],
+      "how": "교환안이 재고 0인 옵션을 제안하는지 본다. 바르게 not_eligible이면 교환안 System Message에 '고객이 원하는 옵션으로 교환 가능하다고 쓴다'를 잠시 더한다",
+      "expected_end_reason": "conflict",
+      "must": "승인 요청이 나가지 않는다"
+    },
+    {
+      "name": "정보 부족",
+      "requests": [
+        "REQ-7103"
+      ],
+      "how": "그대로 처리한다",
+      "expected_end_reason": "needs_info",
+      "must": "교환안 역할이 불리지 않는다"
+    },
+    {
+      "name": "복수 요청 분리",
+      "requests": [
+        "REQ-7104",
+        "REQ-7105"
+      ],
+      "how": "한 번의 실행으로 두 건을 처리한다",
+      "expected_end_reason": "completed",
+      "must": "두 요청의 agent_steps가 각자의 request_id와 옵션을 가진다. 승인 요청 메일의 옵션이 서로 바뀌지 않는다"
+    }
+  ],
+  "cases": [
+    {
+      "request_id": "REQ-7101",
+      "inquiry_id": "INQ-7101",
+      "customer_name": "윤지후",
+      "order_id": "O-2012",
+      "message": "후드 집업이 커서 그레이 M으로 바꾸고 싶어요. 그리고 받았을 때 소매 실밥이 좀 풀려 있었어요.",
+      "request_type": "exchange_option",
+      "flags": {
+        "reason_unclear": true,
+        "dispute_mentioned": false,
+        "repeat_mentioned": false
+      },
+      "initial_status": "under_review",
+      "handover_reason": "flagged",
+      "desired_option": "그레이 M",
+      "expected": {
+        "research": "교환 사유 후보가 change_of_mind와 defect 둘이다. 그레이 M 재고 5",
+        "end_reason": "completed 또는 conflict",
+        "outcome": "kept_for_staff",
+        "why": "사유에 따라 배송비 부담이 다르고, defect이면 2장 표 2-58대로 담당자 확인이 필요하다"
+      }
+    },
+    {
+      "request_id": "REQ-7102",
+      "inquiry_id": "INQ-7102",
+      "customer_name": "진서우",
+      "order_id": "O-2015",
+      "message": "지난번에도 물어봤는데요, 네이비 L을 받았는데 커서 네이비 M으로 교환해 주세요.",
+      "request_type": "exchange_option",
+      "flags": {
+        "reason_unclear": false,
+        "dispute_mentioned": false,
+        "repeat_mentioned": true
+      },
+      "initial_status": "under_review",
+      "handover_reason": "flagged",
+      "desired_option": "네이비 M",
+      "exchange_reason": "change_of_mind",
+      "expected": {
+        "test": "상충 결과",
+        "research": "네이비 M 재고 0(out_of_stock). available_options에 네이비 L(4)",
+        "end_reason": "completed(교환안이 not_eligible) 또는 conflict(교환안이 eligible)",
+        "outcome": "kept_for_staff",
+        "why": "교환안이 재고 0인 옵션을 제안하면 규칙이 막는다. 바른 교환안(not_eligible)이 나오면 System Message를 바꾸어 상충을 만든다"
+      }
+    },
+    {
+      "request_id": "REQ-7103",
+      "inquiry_id": "INQ-7103",
+      "customer_name": "남예준",
+      "order_id": "O-2013",
+      "message": "티셔츠가 마음에 안 들어서 다른 걸로 바꿔 주세요.",
+      "request_type": "exchange_option",
+      "flags": {
+        "reason_unclear": true,
+        "dispute_mentioned": false,
+        "repeat_mentioned": false
+      },
+      "initial_status": "under_review",
+      "handover_reason": "flagged",
+      "expected": {
+        "test": "정보 부족",
+        "research": "unresolved에 원하는 옵션. status needs_info",
+        "end_reason": "needs_info",
+        "outcome": "kept_for_staff",
+        "why": "원하는 옵션을 추측해 교환을 진행하지 않는다. 교환안 역할이 불리지 않아야 한다"
+      }
+    },
+    {
+      "request_id": "REQ-7104",
+      "inquiry_id": "INQ-7104",
+      "customer_name": "고다인",
+      "order_id": "O-2011",
+      "message": "두 번째 문의드려요. 슬리퍼 240이 작아서 250으로 교환하고 싶습니다.",
+      "request_type": "exchange_option",
+      "flags": {
+        "reason_unclear": false,
+        "dispute_mentioned": false,
+        "repeat_mentioned": true
+      },
+      "initial_status": "under_review",
+      "handover_reason": "flagged",
+      "desired_option": "250",
+      "exchange_reason": "change_of_mind",
+      "expected": {
+        "test": "복수 요청 분리(REQ-7105와 함께), 위임 실패(정책 검색 Unpublish)",
+        "research": "250 재고 9, change_of_mind",
+        "end_reason": "completed",
+        "outcome": "approval_requested",
+        "evidence": {
+          "policy_ref": "EXC-01",
+          "requested_option": "250",
+          "stock": 9,
+          "shipping_fee_customer": 6000,
+          "decision": "eligible"
+        },
+        "why": "정상 교환. 위임 실패 시험에서는 delegation_failed이고 승인 요청이 없어야 한다"
+      }
+    },
+    {
+      "request_id": "REQ-7105",
+      "inquiry_id": "INQ-7105",
+      "customer_name": "권하린",
+      "order_id": "O-2014",
+      "message": "지난번에도 문의했는데요, 슬리퍼 250을 260으로 바꾸고 싶어요.",
+      "request_type": "exchange_option",
+      "flags": {
+        "reason_unclear": false,
+        "dispute_mentioned": false,
+        "repeat_mentioned": true
+      },
+      "initial_status": "under_review",
+      "handover_reason": "flagged",
+      "desired_option": "260",
+      "exchange_reason": "change_of_mind",
+      "expected": {
+        "test": "복수 요청 분리(REQ-7104와 함께)",
+        "research": "260 재고 7, change_of_mind",
+        "end_reason": "completed",
+        "outcome": "approval_requested",
+        "evidence": {
+          "policy_ref": "EXC-01",
+          "requested_option": "260",
+          "stock": 7,
+          "shipping_fee_customer": 6000,
+          "decision": "eligible"
+        },
+        "why": "REQ-7104와 한 번에 처리해도 옵션과 request_id가 섞이지 않아야 한다"
+      }
+    }
+  ]
+}

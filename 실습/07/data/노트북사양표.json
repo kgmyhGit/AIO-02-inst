@@ -1,0 +1,33 @@
+{
+  "description": "7장 실습 7-6의 Data table laptop_specs에 넣는 값. 모델 이름과 사양은 모두 지어낸 것이다.",
+  "rows": [
+    {
+      "model": "노바북 13 (2024)",
+      "cpu": "N5 1340",
+      "ram_gb": 16,
+      "ssd_gb": 512,
+      "year": 2024
+    },
+    {
+      "model": "노바북 Pro 14 (2025)",
+      "cpu": "N7 2450",
+      "ram_gb": 32,
+      "ssd_gb": 1024,
+      "year": 2025
+    },
+    {
+      "model": "라이트북 15 (2023)",
+      "cpu": "L5 5500",
+      "ram_gb": 8,
+      "ssd_gb": 256,
+      "year": 2023
+    },
+    {
+      "model": "라이트북 Air 13 (2024)",
+      "cpu": "L7 6600",
+      "ram_gb": 16,
+      "ssd_gb": 512,
+      "year": 2024
+    }
+  ]
+}

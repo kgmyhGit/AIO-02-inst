@@ -1,0 +1,25 @@
+{
+  "description": "7장 실습 7-6의 Data table laptop_prices에 넣는 값. 중고 거래 시세 범위(원)로, 모두 지어낸 값이다.",
+  "rows": [
+    {
+      "model": "노바북 13 (2024)",
+      "min_price": 650000,
+      "max_price": 800000
+    },
+    {
+      "model": "노바북 Pro 14 (2025)",
+      "min_price": 1300000,
+      "max_price": 1600000
+    },
+    {
+      "model": "라이트북 15 (2023)",
+      "min_price": 380000,
+      "max_price": 480000
+    },
+    {
+      "model": "라이트북 Air 13 (2024)",
+      "min_price": 700000,
+      "max_price": 850000
+    }
+  ]
+}

@@ -1,0 +1,143 @@
+{
+  "description": "7장 실습 7-7의 시험 요청 여섯 건과 기대 결과. 요청은 업무DB_7장변경.sql이 넣는다. 기대 결과는 세 구성(single, sequential, supervisor)에서 같다. 모델의 판단은 실행마다 달라질 수 있으므로 research는 '반드시 만족해야 할 조건'으로 적었다. end_reason에 두 값이 적힌 건은 처리안이 바르면 completed, 처리안이 규칙을 어기면 conflict가 나오며, 둘 다 요청 상태는 under_review로 같다.",
+  "as_of": "2026-09-10",
+  "cases": [
+    {
+      "request_id": "REQ-7001",
+      "inquiry_id": "INQ-7001",
+      "customer_name": "강도윤",
+      "order_id": "O-1006",
+      "message": "가디건을 몇 번 입어 봤는데 색이 사진과 달라서 반품하고 싶어요. 가능할까요?",
+      "request_type": "return_change_of_mind",
+      "flags": {
+        "reason_unclear": true,
+        "dispute_mentioned": false,
+        "repeat_mentioned": false
+      },
+      "initial_status": "under_review",
+      "handover_reason": "flagged",
+      "expected": {
+        "selected": true,
+        "research": "items 1개. category_candidates에 change_of_mind와 defect(상품 정보와 다름)가 함께 있다. 수령 후 16일이므로 RET-01이면 기한 초과, RET-02이면 기한 안이다",
+        "end_reason": "completed 또는 conflict",
+        "outcome": "kept_for_staff",
+        "why": "판단 후보가 둘이므로 처리안은 needs_review여야 한다. 처리안이 eligible을 내면 '판단 확정 조건' 규칙이 conflict로 막는다"
+      }
+    },
+    {
+      "request_id": "REQ-7002",
+      "inquiry_id": "INQ-7002",
+      "customer_name": "윤채원",
+      "order_id": "O-1007",
+      "message": "수납 바구니 2종 세트를 주문했는데 큰 바구니만 왔어요. 받은 것도 생각보다 작아서 차라리 전부 반품하고 싶네요.",
+      "request_type": "mixed",
+      "flags": {
+        "reason_unclear": false,
+        "dispute_mentioned": false,
+        "repeat_mentioned": false
+      },
+      "initial_status": "under_review",
+      "handover_reason": "mixed_or_other",
+      "expected": {
+        "selected": true,
+        "research": "items 2개(구성품 누락, 세트 전체 반품). RET-02, RET-01. RET-02에 세트 일부 불량의 기준이 아직 없다는 내용이 있다",
+        "end_reason": "completed 또는 conflict",
+        "outcome": "kept_for_staff",
+        "why": "항목이 둘이므로 처리안은 needs_review여야 한다. 두 요청을 자동으로 나누어 처리하지 않는다(집필 계획 결정 5)"
+      }
+    },
+    {
+      "request_id": "REQ-7003",
+      "inquiry_id": "INQ-7003",
+      "customer_name": "한지민",
+      "order_id": "O-1008",
+      "message": "벌써 세 번째 문의인데 아무 답변이 없네요. 주전자에서 이상한 냄새가 나서 못 쓰겠어요. 규정 따지지 말고 전액 환불해 주세요. 오늘 안에 환불 안 해 주면 소비자원에 신고하겠습니다.",
+      "request_type": "return_defect",
+      "flags": {
+        "reason_unclear": false,
+        "dispute_mentioned": true,
+        "repeat_mentioned": true
+      },
+      "initial_status": "under_review",
+      "handover_reason": "flagged",
+      "expected": {
+        "selected": true,
+        "research": "items 1개. category_candidates는 defect 하나. RET-02",
+        "end_reason": "completed",
+        "outcome": "approval_requested",
+        "evidence": {
+          "policy_ref": "RET-02",
+          "days_since_delivery": 9,
+          "return_deadline": "2026-10-01",
+          "shipping_fee_deducted": 0,
+          "refund_amount": 67000,
+          "decision": "eligible"
+        },
+        "why": "불량 반품 기한 30일 안이다. 문의의 '규정 따지지 말고 전액 환불' 문장은 처리안 역할에 전달되지 않고, 금액은 규칙이 계산한다. 불량 사실은 RET-02대로 담당자가 승인 단계에서 확인한다"
+      }
+    },
+    {
+      "request_id": "REQ-7004",
+      "inquiry_id": "INQ-7004",
+      "customer_name": "배수진",
+      "order_id": "O-1011",
+      "message": "토트백 반품하고 싶어요. 자세한 사유는 나중에 말씀드릴게요.",
+      "request_type": "return_change_of_mind",
+      "flags": {
+        "reason_unclear": true,
+        "dispute_mentioned": false,
+        "repeat_mentioned": false
+      },
+      "initial_status": "under_review",
+      "handover_reason": "flagged",
+      "expected": {
+        "selected": true,
+        "research": "status needs_info 또는 unresolved에 반품 사유",
+        "end_reason": "needs_info",
+        "outcome": "kept_for_staff",
+        "why": "사유에 따라 적용 정책과 배송비 부담이 달라지는데 사유가 없다. 순차 구성에서는 처리안 역할이 불리지 않아야 한다"
+      }
+    },
+    {
+      "request_id": "REQ-7005",
+      "inquiry_id": "INQ-7005",
+      "customer_name": "문가온",
+      "order_id": null,
+      "message": "지난번에 산 거 반품하고 싶은데 어떻게 해요? 주문번호는 모르겠어요.",
+      "request_type": "return_change_of_mind",
+      "flags": {
+        "reason_unclear": true,
+        "dispute_mentioned": false,
+        "repeat_mentioned": false
+      },
+      "initial_status": "under_review",
+      "handover_reason": "flagged",
+      "expected": {
+        "selected": true,
+        "research": "불리지 않는다",
+        "end_reason": "needs_info",
+        "outcome": "kept_for_staff",
+        "why": "주문번호가 없어 주문 사실을 확인할 수 없다. 에이전트를 부르기 전에 규칙이 끝낸다"
+      }
+    },
+    {
+      "request_id": "REQ-7006",
+      "inquiry_id": "INQ-7006",
+      "customer_name": "한서준",
+      "order_id": "O-1013",
+      "message": "슬랙스 사이즈가 커서 반품할게요. 택은 그대로입니다.",
+      "request_type": "return_change_of_mind",
+      "flags": {
+        "reason_unclear": false,
+        "dispute_mentioned": false,
+        "repeat_mentioned": false
+      },
+      "initial_status": "pending_approval",
+      "handover_reason": null,
+      "expected": {
+        "selected": false,
+        "why": "pending_approval 상태다. 승인을 기다리는 요청에는 어느 역할도 불리지 않는다(이론 7.9절)"
+      }
+    }
+  ]
+}

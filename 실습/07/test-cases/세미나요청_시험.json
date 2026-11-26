@@ -1,0 +1,50 @@
+{
+  "description": "7장 실습 7-5의 요청 네 건. expected_roles는 감독 에이전트가 부르기를 기대하는 전문 에이전트다. 모델의 판단이므로 결과가 다를 수 있으며, 다르면 이유를 기록한다.",
+  "requests": [
+    {
+      "id": "S-1",
+      "request": "9월 24일 오후에 15명 들어갈 회의실 있어?",
+      "expected_roles": [
+        "find_venue"
+      ],
+      "expected_notice": false,
+      "check": "중회의실 B가 비어 있다(소회의실 A는 이미 예약되어 있고 정원도 모자란다)"
+    },
+    {
+      "id": "S-2",
+      "request": "30명 세미나에 도시락이랑 인쇄물 준비하면 얼마 들어?",
+      "expected_roles": [
+        "estimate_budget"
+      ],
+      "expected_notice": false,
+      "check": "calc_budget 결과: 도시락 13,000원 × 30명 + 인쇄물 500원 × 30명 = 405,000원"
+    },
+    {
+      "id": "S-3",
+      "request": "9월 23일 오전에 20명 규모로 'n8n 업무 자동화 사례 공유' 세미나를 하려고 해. 회의실 잡을 수 있는지, 기본 다과로 예산이 얼마인지 알려 주고 사내 안내문 초안도 써 줘.",
+      "expected_roles": [
+        "find_venue",
+        "estimate_budget",
+        "write_notice"
+      ],
+      "expected_notice": true,
+      "check": "대회의실 C 또는 세미나실 D. 기본 다과 5,000원 × 20명 = 100,000원. 안내문에 날짜, 시간대, 회의실, 주제가 있다. 안내문 작성은 장소와 예산 결과를 받은 뒤에 불린다"
+    },
+    {
+      "id": "S-4",
+      "request": "다음에 세미나 하나 하려는데 준비 좀 도와줘",
+      "expected_roles": [],
+      "expected_notice": false,
+      "check": "날짜, 인원, 주제를 되묻는다. 전문 에이전트를 부르지 않는다"
+    }
+  ],
+  "pricing": {
+    "snack_level": {
+      "basic": 5000,
+      "standard": 9000,
+      "lunch": 13000
+    },
+    "handout_per_person": 500,
+    "note": "calc_budget 도구의 코드에 같은 값이 들어 있다. 가상의 사내 기준이다"
+  }
+}

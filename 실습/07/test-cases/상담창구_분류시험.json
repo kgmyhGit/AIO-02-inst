@@ -1,0 +1,84 @@
+{
+  "description": "7장 실습 7-3의 분류 시험. 질문마다 새 채팅 창에서 보낸다. expected_route는 기대 담당(shipping_return, exchange_cancel, other, either)이다. topic_switch는 한 채팅 창에서 차례로 보내는 대화다.",
+  "questions": [
+    {
+      "id": "C-01",
+      "message": "단순 변심으로 반품하면 배송비는 누가 내요?",
+      "expected_route": "shipping_return",
+      "note": "5장 S-1과 같은 질문"
+    },
+    {
+      "id": "C-02",
+      "message": "출고됐다고 문자를 받았는데 며칠이면 받아요?",
+      "expected_route": "shipping_return",
+      "note": "5장 S-4와 같은 질문"
+    },
+    {
+      "id": "C-03",
+      "message": "받은 머그컵에 금이 가 있는데 어떻게 해야 하나요?",
+      "expected_route": "shipping_return",
+      "note": "불량 반품"
+    },
+    {
+      "id": "C-04",
+      "message": "주문 취소는 언제까지 할 수 있어요?",
+      "expected_route": "exchange_cancel",
+      "note": "취소"
+    },
+    {
+      "id": "C-05",
+      "message": "O-2001 티셔츠를 L로 바꾸려는데 언제까지 신청해야 해요?",
+      "expected_route": "exchange_cancel",
+      "note": "5장 X-1과 같은 질문"
+    },
+    {
+      "id": "C-06",
+      "message": "아직 배송 전인데 주문 취소하면 전액 돌려받나요?",
+      "expected_route": "exchange_cancel",
+      "note": "5장 X-6과 같은 질문"
+    },
+    {
+      "id": "C-07",
+      "message": "교환 대신 반품해도 되나요?",
+      "expected_route": "either",
+      "note": "두 담당에 걸친다. 어느 쪽으로 가도 틀린 것은 아니다"
+    },
+    {
+      "id": "C-08",
+      "message": "반품 기한이랑 교환 기한 둘 다 알려 주세요",
+      "expected_route": "other",
+      "note": "두 유형이 섞였다. Other로 가서 담당자 연결 또는 나누어 물어 달라는 안내"
+    },
+    {
+      "id": "C-09",
+      "message": "교환하려는데 사이즈 재고가 있는지 봐 주세요",
+      "expected_route": "exchange_cancel",
+      "note": "교환·취소 담당으로 가고, 담당이 재고는 조회하지 않는다며 handoff한다(5장과 같은 동작)"
+    },
+    {
+      "id": "C-10",
+      "message": "회원 등급은 어떻게 올려요?",
+      "expected_route": "other",
+      "note": "상관없는 질문"
+    }
+  ],
+  "topic_switch": [
+    {
+      "turn": 1,
+      "message": "단순 변심 반품은 며칠 안에 신청해야 하나요?",
+      "expected_route": "shipping_return"
+    },
+    {
+      "turn": 2,
+      "message": "그럼 교환은요?",
+      "expected_route": "exchange_cancel",
+      "note": "exchange: 세션의 메모리에는 turn 1이 없다"
+    },
+    {
+      "turn": 3,
+      "message": "배송비는 누가 내요?",
+      "expected_route": "either",
+      "note": "앞의 대화 없이 읽으면 반품인지 교환인지 알 수 없다"
+    }
+  ]
+}

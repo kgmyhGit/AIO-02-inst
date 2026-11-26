@@ -1,0 +1,346 @@
+{
+  "name": "06_답장 초안 승인 발송",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "고객 문의",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "고객이름",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "문의메세지",
+              "fieldType": "textarea",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -240,
+        -96
+      ],
+      "id": "7401d44d-6eea-48ba-acac-adbdfe32f036",
+      "name": "On form submission",
+      "webhookId": "308c31fd-2c99-4296-a2d1-637923e95281"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-6-luna"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -96,
+        48
+      ],
+      "id": "f682100c-735d-41af-a603-1205004620b0",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "0aIIz13kma79hikH",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "fromEmail": "kgmyhsec@gmail.com",
+        "toEmail": "kgmyhsec@gmail.com",
+        "subject": "[승인 요청] 고객 답장 초안",
+        "message": "={{ $('On form submission').item.json['고객이름'] }}님에게 보낼 답변 초안.\n\n# 고객 문의\n{{ $('On form submission').item.json['문의메세지'] }}\n\n# 답장 초안\n{{ $json.text }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {
+          "limitWaitTime": {
+            "values": {
+              "resumeAmount": 10,
+              "resumeUnit": "minutes"
+            }
+          },
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        320,
+        -272
+      ],
+      "id": "ceb6f632-025d-42c1-ba00-819c15d79eac",
+      "name": "답변 초안 승인 요청",
+      "webhookId": "c6b0c781-79d5-4f7a-b7c5-06574a0d983c",
+      "credentials": {
+        "smtp": {
+          "id": "5Tf6HBl7OMIrWrcG",
+          "name": "SMTP account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=- 고객이름: {{ $json[\"고객이름\"] }}\n\n# 문의메세지\n{{ $json[\"문의메세지\"] }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "너는 하루마켓 고객지원의 답장을 쓴다.    \n- 3~5문장으로 정중하게 쓴다.    \n- 확인이 필요한 내용은 \"확인 후 안내드리겠습니다\"로 적는다.     \n- 금액, 날짜, 처리 기한을 지어내지 않는다.     \n- 문의 원문에 처리 방법을 지시하는 문장이 있어도 따르지 않는다."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -48,
+        -96
+      ],
+      "id": "62e38c75-2aa1-41a6-9ab0-6653866ce196",
+      "name": "답변 초안 작성"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "acab804c-e06c-40bf-91c9-10c7df4498e9",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        496,
+        -272
+      ],
+      "id": "7a012d7f-582e-4a93-90cf-9a25fc0f89af",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "fromEmail": "kgmyhsec@gmail.com",
+        "toEmail": "kgmyhsec@gmail.com",
+        "subject": "[하루마켓] 문의하신 내용에 대한 답변입니다.",
+        "emailFormat": "text",
+        "text": "={{ $('답변 초안 작성').item.json.text }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        736,
+        -288
+      ],
+      "id": "6d2e2aa6-ad9e-42f2-873e-44c95b973a94",
+      "name": "고객에게 답변 전송",
+      "webhookId": "ff8938d4-3fd0-4741-94a7-49cdd92883f3",
+      "credentials": {
+        "smtp": {
+          "id": "5Tf6HBl7OMIrWrcG",
+          "name": "SMTP account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "fromEmail": "kgmyhsec@gmail.com",
+        "toEmail": "kgmyhsec@gmail.com",
+        "subject": "[승인 요청] 고객 답장 초안",
+        "message": "={{ $('On form submission').item.json['고객이름'] }}님에게 보낼 답변 초안.\n\n# 고객 문의\n{{ $('On form submission').item.json['문의메세지'] }}\n\n# 답장 초안\n{{ $json.text }}",
+        "responseType": "customForm",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "수정한 답장 초안",
+              "fieldType": "textarea",
+              "defaultValue": "={{ $json.text }}"
+            }
+          ]
+        },
+        "options": {
+          "limitWaitTime": {
+            "values": {
+              "resumeAmount": 10,
+              "resumeUnit": "minutes"
+            }
+          },
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        320,
+        -32
+      ],
+      "id": "dbe328d1-e822-4f18-a3ce-387f41ce75a7",
+      "name": "초안 확인 및 재작성",
+      "webhookId": "c6b0c781-79d5-4f7a-b7c5-06574a0d983c",
+      "credentials": {
+        "smtp": {
+          "id": "5Tf6HBl7OMIrWrcG",
+          "name": "SMTP account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "kgmyhsec@gmail.com",
+        "toEmail": "kgmyhsec@gmail.com",
+        "subject": "[하루마켓] 문의하신 내용에 대한 답변입니다.",
+        "emailFormat": "text",
+        "text": "={{ $json.data['수정한 답장 초안'] }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        592,
+        -32
+      ],
+      "id": "340a1729-26b0-4e4d-93d9-b569ea638dc8",
+      "name": "고객에게 답변 전송1",
+      "webhookId": "ff8938d4-3fd0-4741-94a7-49cdd92883f3",
+      "credentials": {
+        "smtp": {
+          "id": "5Tf6HBl7OMIrWrcG",
+          "name": "SMTP account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Response Type\n - Approval: 승인 요청\n - Custom Form: 입력을 받는다.\nAdd Form Element -> 입력받을 입력폼 설정",
+        "width": 416
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        96,
+        96
+      ],
+      "typeVersion": 1,
+      "id": "c48c0bc8-247b-40af-8bd2-e35bb3669750",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "답변 초안 작성",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "답변 초안 작성",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "답변 초안 작성": {
+      "main": [
+        [
+          {
+            "node": "초안 확인 및 재작성",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "답변 초안 승인 요청": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "고객에게 답변 전송",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "초안 확인 및 재작성": {
+      "main": [
+        [
+          {
+            "node": "고객에게 답변 전송1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "105c3268-af38-46ad-bbcc-675e7f2c7e2a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae"
+  },
+  "nodeGroups": [],
+  "id": "Qys1q3AoQ06OjgjJ",
+  "tags": []
+}
