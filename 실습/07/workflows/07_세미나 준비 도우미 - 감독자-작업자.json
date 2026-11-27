@@ -1,0 +1,644 @@
+{
+  "name": "07_세미나 준비 도우미",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "c5691818-3167-459d-9254-f8045bb19d0d",
+      "name": "지금 실행",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        640,
+        1568
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f0",
+              "name": "request",
+              "value": "9월 23일 오전에 20명 규모로 'n8n 업무 자동화 사례 공유' 세미나를 하려고 해. 회의실 잡을 수 있는지, 기본 다과로 예산이 얼마인지 알려 주고 사내 안내문 초안도 써 줘.",
+              "type": "string"
+            },
+            {
+              "id": "f1",
+              "name": "mail_to",
+              "value": "본인_메일_주소를_여기에_적는다",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bddc9e0a-0c9f-4c85-9572-3a5334ba0d8a",
+      "name": "요청",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        864,
+        1568
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.request }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "너는 사내 세미나 준비를 돕는 감독이다. 직접 답을 만들지 않고 전문 담당에게 맡긴다.\n- find_venue: 날짜, 시간대, 인원으로 빈 회의실을 찾는다.\n- estimate_budget: 인원, 다과 수준, 인쇄물 여부로 예산을 계산한다.\n- write_notice: 확정된 날짜, 시간대, 회의실, 주제로 사내 안내문 초안을 쓴다.\n\n규칙\n1. 요청에 필요한 담당만 부른다. 요청하지 않은 일은 맡기지 않는다.\n2. 안내문이 필요하면 find_venue와 estimate_budget의 결과를 받은 뒤에 write_notice를 부르고, 그 결과를 그대로 넘긴다.\n3. 각 담당은 한 번씩만 부른다.\n4. 오늘은 2026-09-18이다. 날짜에 연도가 없으면 2026년으로 보고, 인쇄물을 말하지 않았으면 인쇄물 없음으로 본다. 빈 회의실이 여럿이면 정원이 인원에 가장 가까운 곳으로 정한다.\n5. 날짜, 인원, 주제처럼 담당에게 넘길 값이 요청에 없으면 담당을 부르지 않고 needs_clarification을 true로 두어 되묻는다.\n6. 안내문을 직접 보내지 않는다. 보내는 일은 사람의 승인 뒤에 시스템이 한다.",
+          "maxIterations": 6,
+          "returnIntermediateSteps": true
+        }
+      },
+      "id": "a143f34c-fde1-45fe-a720-ebf2526cec2c",
+      "name": "준비 감독",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1104,
+        1568
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-6-luna"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "66b7a37e-68ff-4a46-b5a4-cf6ac54435c9",
+      "name": "감독 모델",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        976,
+        1824
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "xeLFhtHww0Dj9GaF",
+          "name": "OpenAI Encore Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"needs_clarification\": {\n      \"type\": \"boolean\"\n    },\n    \"question\": {\n      \"type\": [\n        \"string\",\n        \"null\"\n      ]\n    },\n    \"summary\": {\n      \"type\": \"string\"\n    },\n    \"notice_draft\": {\n      \"type\": [\n        \"string\",\n        \"null\"\n      ]\n    }\n  },\n  \"required\": [\n    \"needs_clarification\",\n    \"question\",\n    \"summary\",\n    \"notice_draft\"\n  ]\n}"
+      },
+      "id": "44b82f05-0e90-4bd9-b34a-b933f420cf76",
+      "name": "감독 출력 형식",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1696,
+        1824
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 감독이 어떤 담당을 어떤 입력으로 어떤 순서로 불렀는지 정리한다.\nconst j = $input.first().json;\nconst steps = Array.isArray(j.intermediateSteps) ? j.intermediateSteps : [];\nconst calls = steps.map((s, i) => ({ // object, index (0부터)\n  order: i + 1,\n  tool: s.action ? s.action.tool : null, // 사용한 tool\n  input: s.action ? s.action.toolInput : null, // tool 입력\n  result: typeof s.observation === 'string' ? s.observation.slice(0, 300) : s.observation // tool 응답값 (300자만)\n}));\nconst failed = j.error !== undefined;\nconst message = failed ? String((j.error && j.error.message) || j.error) : null; //error 메세지\nconst out = failed ? {} : (j.output || {}); // 정상응답. out에는 error이면 {}, 아니면 item의 output\nreturn [{ json: {\n  end_reason: failed ? (message.startsWith('Max iterations') ? 'limit_reached' : 'delegation_failed')\n                     : (out.needs_clarification ? 'needs_info' : 'completed'),\n  roles: calls.map(c => c.tool),\n  calls,\n  model_calls_estimate: calls.length + 1,\n  summary: out.summary ?? null,\n  notice_draft: failed ? null : (out.notice_draft ?? null),\n  error: message\n} }];\n"
+      },
+      "id": "f2bd95a4-c4fd-4085-9493-73b15ee9505e",
+      "name": "위임 기록",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1424,
+        1568
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.end_reason === 'completed' && typeof $json.notice_draft === 'string' && $json.notice_draft.trim() !== '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "21ddd5e5-3cb1-431c-bf2b-27a30200d84f",
+      "name": "안내문이 있는가",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1632,
+        1568
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "fromEmail": "본인_메일_주소를_여기에_적는다",
+        "toEmail": "={{ $('요청').first().json.mail_to }}",
+        "subject": "[승인 요청] 세미나 안내문 발송",
+        "message": "=세미나 안내문 초안입니다. 승인하면 사내 안내 메일로 발송됩니다.\n\n■ 요청\n{{ $('요청').first().json.request }}\n\n■ 담당 호출 순서\n{{ $json.roles.join(' → ') }}\n\n■ 안내문 초안\n{{ $json.notice_draft }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {
+          "limitWaitTime": {
+            "values": {
+              "resumeAmount": 5,
+              "resumeUnit": "minutes"
+            }
+          }
+        }
+      },
+      "id": "b7da5d15-1e14-4b29-9106-a08c8901752c",
+      "name": "발송 승인 요청",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1840,
+        1552
+      ],
+      "webhookId": "05a48dea-37d9-5cda-b835-b2e82bf614c8",
+      "credentials": {
+        "smtp": {
+          "id": "NIRbGNvWsXnAbab6",
+          "name": "SMTP kgmyh73"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "30d01ee9-a32f-4abb-a361-97d8c7c817c3",
+      "name": "승인되었는가",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2016,
+        1552
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "본인_메일_주소를_여기에_적는다",
+        "toEmail": "={{ $('요청').first().json.mail_to }}",
+        "subject": "[사내 안내] 세미나 안내",
+        "emailFormat": "text",
+        "text": "={{ $('위임 기록').first().json.notice_draft }}",
+        "options": {}
+      },
+      "id": "26ab35d1-8d11-4027-a03c-460fd8834e66",
+      "name": "안내문 발송",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        2224,
+        1536
+      ],
+      "webhookId": "4e3c0d13-5d74-56cc-be86-3187af790f52",
+      "credentials": {
+        "smtp": {
+          "id": "NIRbGNvWsXnAbab6",
+          "name": "SMTP kgmyh73"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "세미나 날짜(YYYY-MM-DD), 시간대(오전 또는 오후), 인원을 받아 빈 회의실을 찾는다. 장소를 묻거나 안내문에 장소가 필요할 때 부른다.",
+        "text": "={{ $fromAI('venue_request', '날짜(YYYY-MM-DD), 시간대(오전 또는 오후), 인원을 한 문장으로', 'string') }}",
+        "options": {
+          "systemMessage": "find_rooms로 요청한 날짜와 시간대에 예약되지 않은 회의실을 찾고, 정원이 인원 이상인 곳만 고른다. 고른 회의실 이름과 정원을 답한다. 조건에 맞는 곳이 없으면 없다고 답한다.",
+          "maxIterations": 3
+        }
+      },
+      "id": "c158814d-eb9a-4d4d-ad9a-360ec17a79fd",
+      "name": "find_venue",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 3,
+      "position": [
+        1008,
+        1968
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-6-luna"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "9e057d09-1c70-49c8-80d8-27d1ad2bd266",
+      "name": "find_venue 모델",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        976,
+        2144
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "xeLFhtHww0Dj9GaF",
+          "name": "OpenAI Encore Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "인원, 다과 수준(basic, standard, lunch), 인쇄물 여부를 받아 예산을 계산한다. 비용이나 예산을 물을 때 부른다.",
+        "text": "={{ $fromAI('budget_request', '인원, 다과 수준, 인쇄물 여부를 한 문장으로', 'string') }}",
+        "options": {
+          "systemMessage": "계산은 반드시 calc_budget으로 한다. 직접 곱하거나 더하지 않는다. calc_budget의 결과에 있는 total을 그대로 답한다.",
+          "maxIterations": 3
+        }
+      },
+      "id": "afecf630-56ae-412d-9171-b60eba1507c5",
+      "name": "estimate_budget",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 3,
+      "position": [
+        1312,
+        1968
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-6-luna"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "350f48a0-ff74-4bb6-a14d-ebd5621e6c81",
+      "name": "estimate_budget 모델",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1312,
+        2144
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "xeLFhtHww0Dj9GaF",
+          "name": "OpenAI Encore Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "확정된 날짜, 시간대, 회의실, 주제, 예산을 받아 사내 안내문 초안을 쓴다. 장소와 예산이 정해진 뒤에만 부른다.",
+        "text": "={{ $fromAI('notice_request', '날짜, 시간대, 회의실, 주제, 예산을 빠짐없이', 'string') }}",
+        "options": {
+          "systemMessage": "사내 안내문을 5~7문장으로 쓴다. 날짜, 시간대, 회의실, 주제를 빠짐없이 쓴다. 받은 값에 없는 내용을 지어내지 않는다.",
+          "maxIterations": 3
+        }
+      },
+      "id": "cbf2e34f-df64-4c37-ad20-5ad22265eca4",
+      "name": "write_notice",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 3,
+      "position": [
+        1584,
+        1968
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-6-luna"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "ba9e6099-0772-4c99-952a-6fa72ac15631",
+      "name": "write_notice 모델",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1584,
+        2144
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "xeLFhtHww0Dj9GaF",
+          "name": "OpenAI Encore Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "날짜와 시간대로 예약되지 않은 회의실 목록을 가져온다.",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "rooms"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "date",
+              "keyValue": "={{ $fromAI('date', '날짜. YYYY-MM-DD', 'string') }}"
+            },
+            {
+              "keyName": "slot",
+              "keyValue": "={{ $fromAI('slot', '시간대. 오전 또는 오후', 'string') }}"
+            },
+            {
+              "keyName": "booked",
+              "keyValue": false
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "id": "e70b1f1f-baab-45af-801c-2c0578023b40",
+      "name": "find_rooms",
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1.1,
+      "position": [
+        1168,
+        2144
+      ]
+    },
+    {
+      "parameters": {
+        "description": "세미나 예산을 계산한다. attendees(인원, 정수), snack_level(basic, standard, lunch 중 하나), handouts(인쇄물 여부, true 또는 false)를 받는다.",
+        "jsCode": "// 가상의 사내 단가다. 계산은 모델이 아니라 이 코드가 한다. 결과는 글자 하나로 돌려준다.\nconst PRICE = { basic: 5000, standard: 9000, lunch: 13000 };\nconst HANDOUT = 500;\nconst n = Number(query.attendees);\nif (!Number.isInteger(n) || n <= 0) {\n  return JSON.stringify({ status: 'invalid_input', reason: 'attendees는 1 이상의 정수여야 한다' });\n}\nif (!(query.snack_level in PRICE)) {\n  return JSON.stringify({ status: 'invalid_input', reason: 'snack_level은 basic, standard, lunch 중 하나여야 한다' });\n}\nconst snack = PRICE[query.snack_level] * n;\nconst handouts = query.handouts === true ? HANDOUT * n : 0;\nreturn JSON.stringify({ status: 'ok', attendees: n, snack_level: query.snack_level,\n  snack_total: snack, handout_total: handouts, total: snack + handouts });\n",
+        "specifyInputSchema": true,
+        "jsonSchemaExample": "{ \"attendees\": 10, \"snack_level\": \"basic\", \"handouts\": false }"
+      },
+      "id": "a05bf048-2f18-4f88-b0b8-00b7ad6e13bb",
+      "name": "calc_budget",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        1456,
+        2144
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "지금 실행": {
+      "main": [
+        [
+          {
+            "node": "요청",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "요청": {
+      "main": [
+        [
+          {
+            "node": "준비 감독",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "감독 모델": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "준비 감독",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "감독 출력 형식": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "준비 감독",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "준비 감독": {
+      "main": [
+        [
+          {
+            "node": "위임 기록",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "위임 기록",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "위임 기록": {
+      "main": [
+        [
+          {
+            "node": "안내문이 있는가",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "안내문이 있는가": {
+      "main": [
+        [
+          {
+            "node": "발송 승인 요청",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "발송 승인 요청": {
+      "main": [
+        [
+          {
+            "node": "승인되었는가",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "승인되었는가": {
+      "main": [
+        [
+          {
+            "node": "안내문 발송",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "find_rooms": {
+      "ai_tool": [
+        [
+          {
+            "node": "find_venue",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calc_budget": {
+      "ai_tool": [
+        [
+          {
+            "node": "estimate_budget",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "find_venue": {
+      "ai_tool": [
+        [
+          {
+            "node": "준비 감독",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "find_venue 모델": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "find_venue",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "estimate_budget": {
+      "ai_tool": [
+        [
+          {
+            "node": "준비 감독",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "estimate_budget 모델": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "estimate_budget",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "write_notice": {
+      "ai_tool": [
+        [
+          {
+            "node": "준비 감독",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "write_notice 모델": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "write_notice",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1529af8c-5e8f-4134-9956-320cbb28289c",
+  "meta": {
+    "instanceId": "10a5c67d3b7c97270ceae20c841dc3e0a60f6027bf994653ce958e1fb31213fd"
+  },
+  "nodeGroups": [],
+  "id": "rwfrwBlEnxtsn0yI",
+  "tags": []
+}

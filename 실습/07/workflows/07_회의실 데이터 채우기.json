@@ -1,0 +1,150 @@
+{
+  "name": "07_회의실 데이터 채우기",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "e29ab35d-2160-4014-8941-ad7d42059242",
+      "name": "시작",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 회의실예약_샘플.json의 rows 배열을 그대로 붙여 넣었다.\nconst rows = [\n  {\n    \"room\": \"소회의실 A\",\n    \"capacity\": 8,\n    \"date\": \"2026-09-21\",\n    \"slot\": \"오전\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"소회의실 A\",\n    \"capacity\": 8,\n    \"date\": \"2026-09-21\",\n    \"slot\": \"오후\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"소회의실 A\",\n    \"capacity\": 8,\n    \"date\": \"2026-09-22\",\n    \"slot\": \"오전\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"소회의실 A\",\n    \"capacity\": 8,\n    \"date\": \"2026-09-22\",\n    \"slot\": \"오후\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"소회의실 A\",\n    \"capacity\": 8,\n    \"date\": \"2026-09-23\",\n    \"slot\": \"오전\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"소회의실 A\",\n    \"capacity\": 8,\n    \"date\": \"2026-09-23\",\n    \"slot\": \"오후\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"소회의실 A\",\n    \"capacity\": 8,\n    \"date\": \"2026-09-24\",\n    \"slot\": \"오전\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"소회의실 A\",\n    \"capacity\": 8,\n    \"date\": \"2026-09-24\",\n    \"slot\": \"오후\",\n    \"booked\": true\n  },\n  {\n    \"room\": \"소회의실 A\",\n    \"capacity\": 8,\n    \"date\": \"2026-09-25\",\n    \"slot\": \"오전\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"소회의실 A\",\n    \"capacity\": 8,\n    \"date\": \"2026-09-25\",\n    \"slot\": \"오후\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"중회의실 B\",\n    \"capacity\": 16,\n    \"date\": \"2026-09-21\",\n    \"slot\": \"오전\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"중회의실 B\",\n    \"capacity\": 16,\n    \"date\": \"2026-09-21\",\n    \"slot\": \"오후\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"중회의실 B\",\n    \"capacity\": 16,\n    \"date\": \"2026-09-22\",\n    \"slot\": \"오전\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"중회의실 B\",\n    \"capacity\": 16,\n    \"date\": \"2026-09-22\",\n    \"slot\": \"오후\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"중회의실 B\",\n    \"capacity\": 16,\n    \"date\": \"2026-09-23\",\n    \"slot\": \"오전\",\n    \"booked\": true\n  },\n  {\n    \"room\": \"중회의실 B\",\n    \"capacity\": 16,\n    \"date\": \"2026-09-23\",\n    \"slot\": \"오후\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"중회의실 B\",\n    \"capacity\": 16,\n    \"date\": \"2026-09-24\",\n    \"slot\": \"오전\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"중회의실 B\",\n    \"capacity\": 16,\n    \"date\": \"2026-09-24\",\n    \"slot\": \"오후\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"중회의실 B\",\n    \"capacity\": 16,\n    \"date\": \"2026-09-25\",\n    \"slot\": \"오전\",\n    \"booked\": true\n  },\n  {\n    \"room\": \"중회의실 B\",\n    \"capacity\": 16,\n    \"date\": \"2026-09-25\",\n    \"slot\": \"오후\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"대회의실 C\",\n    \"capacity\": 30,\n    \"date\": \"2026-09-21\",\n    \"slot\": \"오전\",\n    \"booked\": true\n  },\n  {\n    \"room\": \"대회의실 C\",\n    \"capacity\": 30,\n    \"date\": \"2026-09-21\",\n    \"slot\": \"오후\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"대회의실 C\",\n    \"capacity\": 30,\n    \"date\": \"2026-09-22\",\n    \"slot\": \"오전\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"대회의실 C\",\n    \"capacity\": 30,\n    \"date\": \"2026-09-22\",\n    \"slot\": \"오후\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"대회의실 C\",\n    \"capacity\": 30,\n    \"date\": \"2026-09-23\",\n    \"slot\": \"오전\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"대회의실 C\",\n    \"capacity\": 30,\n    \"date\": \"2026-09-23\",\n    \"slot\": \"오후\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"대회의실 C\",\n    \"capacity\": 30,\n    \"date\": \"2026-09-24\",\n    \"slot\": \"오전\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"대회의실 C\",\n    \"capacity\": 30,\n    \"date\": \"2026-09-24\",\n    \"slot\": \"오후\",\n    \"booked\": true\n  },\n  {\n    \"room\": \"대회의실 C\",\n    \"capacity\": 30,\n    \"date\": \"2026-09-25\",\n    \"slot\": \"오전\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"대회의실 C\",\n    \"capacity\": 30,\n    \"date\": \"2026-09-25\",\n    \"slot\": \"오후\",\n    \"booked\": true\n  },\n  {\n    \"room\": \"세미나실 D\",\n    \"capacity\": 50,\n    \"date\": \"2026-09-21\",\n    \"slot\": \"오전\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"세미나실 D\",\n    \"capacity\": 50,\n    \"date\": \"2026-09-21\",\n    \"slot\": \"오후\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"세미나실 D\",\n    \"capacity\": 50,\n    \"date\": \"2026-09-22\",\n    \"slot\": \"오전\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"세미나실 D\",\n    \"capacity\": 50,\n    \"date\": \"2026-09-22\",\n    \"slot\": \"오후\",\n    \"booked\": true\n  },\n  {\n    \"room\": \"세미나실 D\",\n    \"capacity\": 50,\n    \"date\": \"2026-09-23\",\n    \"slot\": \"오전\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"세미나실 D\",\n    \"capacity\": 50,\n    \"date\": \"2026-09-23\",\n    \"slot\": \"오후\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"세미나실 D\",\n    \"capacity\": 50,\n    \"date\": \"2026-09-24\",\n    \"slot\": \"오전\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"세미나실 D\",\n    \"capacity\": 50,\n    \"date\": \"2026-09-24\",\n    \"slot\": \"오후\",\n    \"booked\": true\n  },\n  {\n    \"room\": \"세미나실 D\",\n    \"capacity\": 50,\n    \"date\": \"2026-09-25\",\n    \"slot\": \"오전\",\n    \"booked\": false\n  },\n  {\n    \"room\": \"세미나실 D\",\n    \"capacity\": 50,\n    \"date\": \"2026-09-25\",\n    \"slot\": \"오후\",\n    \"booked\": false\n  }\n];\nreturn rows.map(r => ({ json: r }));\n"
+      },
+      "id": "1e4c452c-2d9e-4f7d-8fe8-42827c056756",
+      "name": "예약 현황",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        144,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "RLIqQVVu2VfPNF6e",
+          "mode": "list",
+          "cachedResultName": "rooms",
+          "cachedResultUrl": "/projects/8OJ0i0nETVn3tGxp/datatables/RLIqQVVu2VfPNF6e"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "room",
+              "displayName": "room",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "capacity",
+              "displayName": "capacity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "slot",
+              "displayName": "slot",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "22db4d0f-cf49-42f0-8cc4-a28c0acaa15f",
+      "name": "회의실 넣기",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        368,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Data Table \n- Data table 이름: `rooms`\n- room: string\n- capacity: number\n- date: string\n- slot: string\n- booked: boolean",
+        "height": 200,
+        "width": 660
+      },
+      "id": "5bef176f-4a82-485b-a797-769e46fe4bbc",
+      "name": "안내",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "시작": {
+      "main": [
+        [
+          {
+            "node": "예약 현황",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "예약 현황": {
+      "main": [
+        [
+          {
+            "node": "회의실 넣기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "06e0d423-1f74-4995-804e-b685c38ee4a2",
+  "meta": {
+    "instanceId": "10a5c67d3b7c97270ceae20c841dc3e0a60f6027bf994653ce958e1fb31213fd"
+  },
+  "nodeGroups": [],
+  "id": "tzLaZSqJmyImRtDp",
+  "tags": []
+}
