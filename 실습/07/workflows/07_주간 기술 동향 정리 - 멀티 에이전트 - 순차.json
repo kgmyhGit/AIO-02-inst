@@ -1,0 +1,623 @@
+{
+  "name": "07_주간 기술 동향 정리 - 멀티 에이전트 - 순차",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        -80
+      ],
+      "id": "3f90be8f-97d1-4284-b2f1-f4b7412c5a65",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "28cff225-6ac9-49c1-8f1e-34b4f1843cae",
+              "name": "post_id",
+              "value": "={{ $json.post_id }}",
+              "type": "string"
+            },
+            {
+              "id": "6aea800a-ae49-4c6c-b4b7-7c1c202f0f41",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "5d996ec4-98df-4511-bff1-48bbb3b33be2",
+              "name": "summary",
+              "value": "={{ $json.summary }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -240,
+        -80
+      ],
+      "id": "8db5afee-f265-4216-b533-ab4f10ae90e1",
+      "name": "필요한 필드 추출"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "LSHTKYYnIoZwEGqe",
+          "mode": "list",
+          "cachedResultName": "tech_posts",
+          "cachedResultUrl": "/projects/v7pUrkzpSuSJCp9z/datatables/LSHTKYYnIoZwEGqe"
+        },
+        "filters": {
+          "conditions": []
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -384,
+        -80
+      ],
+      "id": "d7e620b9-19ce-4cc0-8d52-ec550ca86a50",
+      "name": "전체 목록 조회"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "posts",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -80
+      ],
+      "id": "1fb9251d-a1e8-410e-a7bf-ee2023dbdc06",
+      "name": "Item들 합치기"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d9088a57-364e-4480-9d1a-b9ddfed0f175",
+              "name": "period",
+              "value": "={{ $('전체 목록 조회').all().first().json.published }} ~ {{ $('전체 목록 조회').all().last().json.published }}",
+              "type": "string"
+            },
+            {
+              "id": "83b57eb5-92bc-4c59-9b63-0955bd648f82",
+              "name": "posts",
+              "value": "={{ $json.posts }}",
+              "type": "array"
+            },
+            {
+              "id": "63877d05-cbbc-496c-8d24-ec8442eb026a",
+              "name": "all_ids",
+              "value": "={{ $json.posts.map(p => p.post_id) }}",
+              "type": "string"
+            },
+            {
+              "id": "670cb322-e4e5-46e9-ac40-a775aed3aee4",
+              "name": "",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        80,
+        -80
+      ],
+      "id": "d79a75cf-7170-4372-8fbe-330888e49efe",
+      "name": "목록 만들기"
+    },
+    {
+      "parameters": {
+        "content": "## Agent 역할을 분리\n\n- 자료조사 agent\n- 보고서 작성 agent\n\n순서대로 일을 한다. -> 순차연결",
+        "height": 128,
+        "width": 272
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        160,
+        -224
+      ],
+      "typeVersion": 1,
+      "id": "8ac2f847-874b-413a-ad2a-00a3550f78ff",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# 기간\n{{ $json.period }}\n\n# 글목록\n{{ JSON.stringify($json.posts) }}\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "너는 개발팀 주간 기술 동향 보고서의 자료를 조사한다. 보고서 문장은 다른 담당이 쓴다.\n1. 글 목록에서 보고서에 넣을 글을 고른다. 광고와 기술 소식이 없는 글은 excluded에 이유와 함께 적는다.\n2. 요약이 짧거나 모호한 글은 반드시 본문을 읽는다.\n3. 고른 글을 \"AI 에이전트\", \"개발 도구\", \"보안\" 세 주제로 묶는다.\n4. 글마다 본문이나 요약에서 확인한 사실을 facts에 한두 개 적는다. 글에 없는 내용을 쓰지 않는다.\n5. 고를 글이 하나도 없으면 status를 needs_info로, 있으면 ok로 낸다.\n보고서 문장(report)은 쓰지 않는다.",
+          "maxIterations": 20,
+          "returnIntermediateSteps": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        256,
+        -80
+      ],
+      "id": "70915845-3c4b-48b7-9494-ba49a652399e",
+      "name": "자료 조사"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-6-luna"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        128
+      ],
+      "id": "fa8fa327-f981-4d1d-9340-d9e5810e31d3",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "0aIIz13kma79hikH",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "글 번호(post_id)로 글 본문(body)를 가져온다. 요약이 짧거나 모호해서 무슨 뉴스인지 알 수 없을 때 사용한다.",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "LSHTKYYnIoZwEGqe",
+          "mode": "list",
+          "cachedResultName": "tech_posts",
+          "cachedResultUrl": "/projects/v7pUrkzpSuSJCp9z/datatables/LSHTKYYnIoZwEGqe"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "post_id",
+              "keyValue": "={{ $fromAI('post_id', `본문을 읽을 글의 id(post_id). \"P-\" 뒤에 숫자 두 자리로 구성. (예: P-01, P-12)`, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1.1,
+      "position": [
+        336,
+        112
+      ],
+      "id": "8bb8d1a1-c2a6-44a9-bd66-78ce17700439",
+      "name": "get_post_body"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"status\": { \"type\": \"string\", \"enum\": [\"ok\", \"needs_info\"] },\n    \"topics\": { \"type\": \"array\", \"items\": { \"type\": \"object\", \"properties\": {\n      \"topic\": { \"type\": \"string\" },\n      \"posts\": { \"type\": \"array\", \"items\": { \"type\": \"object\", \"properties\": {\n        \"post_id\": { \"type\": \"string\" },\n        \"facts\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } } }, \"required\": [\"post_id\", \"facts\"] } } },\n      \"required\": [\"topic\", \"posts\"] } },\n    \"excluded\": { \"type\": \"array\", \"items\": { \"type\": \"object\", \"properties\": {\n      \"post_id\": { \"type\": \"string\" }, \"reason\": { \"type\": \"string\" } }, \"required\": [\"post_id\", \"reason\"] } }\n  },\n  \"required\": [\"status\", \"topics\", \"excluded\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        512,
+        112
+      ],
+      "id": "8b6b5208-f82b-4981-a3ff-03c2e5f6a1c1",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 넘기기 전에 조사 결과를 역할 계약으로 검사한다. 통과한 조사 결과만 research 필드로 넘긴다.\nconst j = $input.first().json;\nconst ids = $('목록 만들기').first().json.all_ids;\nconst out = j.output || {};\nconst topics = Array.isArray(out.topics) ? out.topics : [];\nconst picked = topics.flatMap(t => (t.posts || []).map(p => p.post_id));\n// status 가 ok, needs_info 중 하나인지\n// 참조한 id들이 실제 디비에 있는 id들인지\n// 모든 조회결과에 fact 항목이 있는지\n// report(보고서) 항목이 있는지? (없어야 한다.)\nconst rules = {\n  r_status: ['ok', 'needs_info'].includes(out.status),\n  r_ids_exist: picked.every(id => ids.includes(id)),\n  r_has_facts: topics.every(t => (t.posts || []).every(p => Array.isArray(p.facts) && p.facts.length > 0)),\n  r_no_report: out.report === undefined\n};\nconst failed = Object.keys(rules).filter(k => !rules[k]);\nconst passed = failed.length === 0 && out.status === 'ok';\nconst end_reason = failed.length > 0 ? 'delegation_failed' : (out.status === 'ok' ? null : 'needs_info');\nconst steps = Array.isArray(j.intermediateSteps) ? j.intermediateSteps : [];\nreturn [{ json: { passed, end_reason, failed_rules: failed,\n  research: { topics, excluded: out.excluded || [] },\n  body_reads: steps.filter(s => s.action && s.action.tool === 'get_post_body').map(s => s.action.toolInput) } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        -80
+      ],
+      "id": "eab35d5e-ca44-488e-8609-0d8cb997e6bf",
+      "name": "조사 결과 검사"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a3ba70f2-29af-45bb-bc20-6fb5eb16191e",
+              "leftValue": "={{ $json.passed }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        736,
+        -80
+      ],
+      "id": "4057696a-3540-426d-b798-425fb26d9f76",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "878ad74a-aa1c-4d04-9640-29928cad0bca",
+              "name": "end_reason",
+              "value": "={{ $json.end_reason }}",
+              "type": "string"
+            },
+            {
+              "id": "dfcde372-bb4e-4bdd-bcc5-5765a13b9c74",
+              "name": "fail_rules",
+              "value": "={{ $json.fail_rules }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        928,
+        176
+      ],
+      "id": "670a8681-54d6-4d18-af77-592f7769fc54",
+      "name": "보고서 작성 실패 사유 기록"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# 조사결과\n{{ JSON.stringify($json.research) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "너는 개발팀의 주간 기술 동향 보고서를 쓴다. 조사 결과만 보고 쓴다.\n- 주제마다 두세 문장으로 쓴다. 문장마다 근거가 된 글 번호를 [P-00] 형식으로 붙인다.\n- 조사 결과에 없는 글과 사실을 쓰지 않는다. 조사 결과의 facts를 부풀리지 않는다.\n- citations에는 보고서에 인용한 글 번호를 모두 적는다.\n- 고칠 점이 주어지면 그 점을 고쳐 다시 쓴다."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        960,
+        -320
+      ],
+      "id": "53d53b9a-c9d5-4145-8e8f-b2a5ea651bca",
+      "name": "보고서 작성"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-6-luna"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        912,
+        -128
+      ],
+      "id": "a1e44f32-7332-40ec-92ba-3a95b37fc5fb",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "0aIIz13kma79hikH",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"report\": { \"type\": \"string\" },\n    \"citations\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } \n  }\n  },\n   \n  \"required\": [\"report\", \"citations\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1184,
+        -112
+      ],
+      "id": "a273d01e-d12f-4556-b26c-319ff156d1aa",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 보고서의 인용을 규칙으로 검사한다. 넘어오지 않은 정보는 이 검사로 찾을 수 없다(실습 5단계).\nconst j = $input.first().json;                                        // 앞 노드가 낸 결과 한 건을 가져온다\nconst out = j.output || j;                                            // 에이전트 결과가 output 안에 있든 밖에 있든 같게 읽는다\nconst report = String(out.report || '');                              // 검사 대상인 보고서 본문\nconst citations = Array.isArray(out.citations) ? out.citations : [];  // 모델이 인용했다고 적어 낸 글 번호 목록\nconst research = $('조사 결과 검사').isExecuted ? $('조사 결과 검사').first().json.research : null;  // 나눈 구성이면 조사 결과를, 단일 구성이면 null을 쓴다\nconst allowed = research\n  ? research.topics.flatMap(t => t.posts.map(p => p.post_id))         // 나눈 구성: 조사 역할이 고른 글만 인용할 수 있다\n  : $('목록 만들기').first().json.all_ids;                              // 단일 구성: 이번 주 글 목록 전체가 인용 대상이다\nconst inReport = [...new Set(report.match(/P-[0-9]{2}/g) || [])];     // 보고서 문장에 실제로 적힌 글 번호\nconst rules = {\n  r_cited_allowed: citations.every(id => allowed.includes(id)),       // 인용 대상 밖의 글 번호를 지어내지 않았는가\n  r_report_ids_cited: inReport.every(id => citations.includes(id))    // 보고서에 쓴 글 번호가 citations에도 빠짐없이 있는가\n};\nconst failed = Object.keys(rules).filter(k => !rules[k]);             // 어긴 규칙의 이름을 모은다\nreturn [{ json: { passed: failed.length === 0, failed_rules: failed, report, citations } }];  // 두 규칙을 모두 지켰는지와 어긴 규칙을 넘긴다"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1296,
+        -320
+      ],
+      "id": "3928cb88-43cd-4d0c-ae70-48b88cda5d68",
+      "name": "보고서 출처 검사"
+    },
+    {
+      "parameters": {
+        "fromEmail": "kgmyhsec@gmail.com",
+        "toEmail": "kgmyhsec@gmail.com",
+        "subject": "=기술 동향 주간 보고서 - {{ $('목록 만들기').item.json.period }}",
+        "html": "={{ $json.html }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1680,
+        -320
+      ],
+      "id": "954fdb3c-1aa9-4f25-93ac-7164d584a4c7",
+      "name": "Send an Email",
+      "webhookId": "a13bb01e-d356-4768-8133-9d5e171a7688",
+      "credentials": {
+        "smtp": {
+          "id": "5Tf6HBl7OMIrWrcG",
+          "name": "SMTP account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.report }}",
+        "destinationKey": "html",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        1488,
+        -320
+      ],
+      "id": "4d6650b2-603d-45ba-b663-02b27f89926a",
+      "name": "Markdown"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "전체 목록 조회",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "전체 목록 조회": {
+      "main": [
+        [
+          {
+            "node": "필요한 필드 추출",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "필요한 필드 추출": {
+      "main": [
+        [
+          {
+            "node": "Item들 합치기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Item들 합치기": {
+      "main": [
+        [
+          {
+            "node": "목록 만들기",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "목록 만들기": {
+      "main": [
+        [
+          {
+            "node": "자료 조사",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "자료 조사",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_post_body": {
+      "ai_tool": [
+        [
+          {
+            "node": "자료 조사",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "자료 조사",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "자료 조사": {
+      "main": [
+        [
+          {
+            "node": "조사 결과 검사",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "조사 결과 검사": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "보고서 작성",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "보고서 작성 실패 사유 기록",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "보고서 작성",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "보고서 작성",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "보고서 작성": {
+      "main": [
+        [
+          {
+            "node": "보고서 출처 검사",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "보고서 출처 검사": {
+      "main": [
+        [
+          {
+            "node": "Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "2d4aeba4-e2a5-467f-acd6-d5a913224f0d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f6e0a1e2ac41945a9aa7ff8a8aaa0cebc12a3bcc981a929ad5cf810a090e11ae"
+  },
+  "nodeGroups": [],
+  "id": "xyixPuDW0nCIlOm5",
+  "tags": []
+}
